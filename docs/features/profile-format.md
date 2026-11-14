@@ -7,7 +7,7 @@ One JSON file holds a whole taste profile: who it belongs to, whose taste they w
 | Status | In review as of 2026-11-13 |
 | Area | File format, version 1.0 |
 | Delivered in | Issue #1, "Define the taste profile format" |
-| Related | [The schema](../../schema/profile.schema.json), [the example profile](../../examples/profile.json) |
+| Related | [Profile app](profile-app.md), [the schema](../../schema/profile.schema.json), [the example profile](../../examples/profile.json) |
 
 ## At a glance
 
@@ -111,9 +111,9 @@ Each promise is checked by a test in `test/format.test.mjs`.
 
 | What you see | What to do |
 |---|---|
-| `/entries/0/gave boolean schema is false` | The entry is a taste reference. Remove `gave` and `creditedIn`, or change `relation` to `inspiration` |
+| `/entries/0/gave is only allowed on an inspiration` | The entry is a taste reference. Remove `gave` and `creditedIn`, or change `relation` to `inspiration` |
 | `must have required property 'creditedIn'` | The entry is an inspiration. Name the work that credits it |
-| `must NOT have additional properties` | A field name is wrong or not in the format |
+| `has a field the format does not know` | A field name is wrong or not in the format |
 | `id "x" is already used by /entries/n` | Give one of the two entries a different `id` |
 | `must match format "date"` | Write `added` as a real date, `YYYY-MM-DD` |
 
@@ -129,7 +129,7 @@ Each promise is checked by a test in `test/format.test.mjs`.
 | Check | Outcome |
 |---|---|
 | The example profile validates | pass |
-| 15 format tests, `npm test` | pass |
+| The format tests, `npm test` | pass |
 | The validate script exits 1 on an invalid file | pass |
 | A real profile written in the format | not checked |
 | The schema in a validator other than Ajv | not checked |
@@ -141,7 +141,8 @@ Each promise is checked by a test in `test/format.test.mjs`.
 | `schema/profile.schema.json` | The JSON Schema, draft 2020-12 |
 | `schema/kinds.json` | Kind to schema.org type |
 | `examples/profile.json` | A profile with both relations, made-up entities only |
-| `scripts/validate.mjs` | The check: the schema plus unique ids. Exports `validate(profile)` |
+| `src/validate.ts` | The check: the schema plus unique ids. Exports `validate(profile)` |
+| `scripts/validate.mjs` | The command line for the check |
 | `test/format.test.mjs` | The tests |
 
-The check needs Node 20 or newer, with `ajv` and `ajv-formats` as development dependencies.
+The check needs Node 22.18 or newer, with `ajv` and `ajv-formats`.

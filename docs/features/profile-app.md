@@ -1,0 +1,143 @@
+# Profile app
+
+A page in your browser opens a profile file, edits it, shows it, and saves it back to your disk.
+
+| | |
+|---|---|
+| Status | In review as of 2026-11-13. The narrated video is not made yet |
+| Area | Browser app |
+| Delivered in | Issue #2, "Build the app to edit and view a profile" |
+| Related | [Profile format](profile-format.md) |
+
+## At a glance
+
+- The app runs in the browser. It has no account and no backend. Your file is the store.
+- It shows inspirations and taste references in two separate lists.
+- It checks every change against the format. A profile that is not valid never reaches your file.
+- **Move to inspirations** asks what the entry gave and which work credits it.
+- **Export JSON-LD** writes the profile as schema.org data for a web page.
+
+## Why it exists
+
+A profile is a JSON file, and JSON is slow to edit by hand. The app gives the file a form and a readable view, and it keeps the rule of the format: a taste reference is never shown as an influence. It is issue #2.
+
+## How it works
+
+Start the app, then open a file or start a new one.
+
+1. Run `npm install`, then `npm run dev`. Open the address that the command prints.
+2. Select **New profile**, **Open a file** or **See the example**.
+3. Select **Add** above a list to add an entry to that list.
+4. Select **Save**. The top bar shows "not saved" until you do.
+
+### Add an entry
+
+The form asks for a name, a kind, a date, the relation, and one or more links. Tags and notes are optional. The app makes the entry's `id` from its name, and never changes it.
+
+If you select **Inspiration**, the form also asks for two things:
+
+| Field | What to write |
+|---|---|
+| What it gave | One sentence: what your work took from it |
+| Credited in | The work of yours that credits it. One work on each line: a name, then `\|` and a link if there is one |
+
+### Move a taste reference to inspirations
+
+1. Select **Move to inspirations** on the entry's card.
+2. Write what it gave, and the work that credits it.
+3. Select **Save**. The entry moves to the other list. It keeps its `id` and its date.
+
+To move an entry back, select **Edit** and change the relation to **Taste reference**. The app then drops what it gave and the credits.
+
+### Remove an entry
+
+Select **Remove**. A message at the bottom of the page offers **Undo** for 8 seconds.
+
+### Export JSON-LD
+
+**Export JSON-LD** downloads a `.jsonld` file with a schema.org graph:
+
+| Node | What it holds |
+|---|---|
+| The owner | A `Person` or `Organization` with its links |
+| `#inspirations` | An `ItemList`. Each item is the entity, with what it gave as the item's description |
+| `#taste-references` | An `ItemList`. Each item is the entity only |
+| One `CreativeWork` for each crediting work | The owner as `creator`, and the inspirations it credits as `mentions` |
+
+```json
+{
+  "@type": "ListItem",
+  "position": 2,
+  "item": {
+    "@type": "CreativeWork",
+    "@id": "#entry-the-quiet-grid",
+    "name": "The Quiet Grid",
+    "url": "https://books.example/the-quiet-grid",
+    "sameAs": ["https://books.example/the-quiet-grid"],
+    "keywords": "layout, restraint"
+  },
+  "description": "The eight-column layout and its wide outer margins."
+}
+```
+
+*Illustrative example, not real data.*
+
+## What it guarantees
+
+Each promise is checked by a test in `test/app.test.mjs`.
+
+- The app writes only valid profiles. Every add, edit and move runs the same check as `npm run validate`.
+- A taste reference never carries what it gave, in the view, the file or the export.
+- An entry keeps its `id` and its date when it moves to inspirations.
+- The saved file reads back as the same profile.
+- The export leaves your notes out.
+
+## What it does not do
+
+- It does not save in place in every browser. Chrome and Edge write back to the file you opened. Firefox and Safari download a new copy on each save.
+- It does not open a file that is not valid. It lists the problems, and you fix the file by hand.
+- It does not keep a draft. If you close the tab before you save, the changes are gone. The browser asks first.
+- It does not edit the `id` of an entry, or reorder entries.
+- It does not format notes. Notes are plain text until the editor field of issue #3 exists.
+- It is not hosted anywhere. You run it from a checkout.
+
+> **Not verified:** Open and save through the browser's file picker, and the Firefox and Safari download path. The checks in the browser used the built-in example.
+
+## When something goes wrong
+
+| What you see | What to do |
+|---|---|
+| "This file is not a valid profile" | Fix the listed problems in the file, then open it again. `npm run validate -- <file>` shows the same list |
+| "Links: add one or more." | Give the entry one or more links that start with `http://` or `https://` |
+| "Credited in: add one or more." | An inspiration must name the work that credits it. If no work credits it yet, keep it a taste reference |
+| Save downloads a file each time | Your browser cannot write to the file. Replace the old file with the download |
+
+## Key decisions
+
+- **No framework.** The app is TypeScript and the DOM. Issue #2 says to add a framework only if the editor field needs one.
+- **One check for the app, the tests and the command line.** All three import `src/validate.ts`, so they cannot disagree.
+- **Changes are pure functions.** Each one in `src/profile.ts` returns a new profile. That makes Undo one line, and the tests run without a browser.
+- **Two lists in the export, not one list with a flag.** A reader of the JSON-LD cannot mistake a taste reference for a credit.
+
+## Verification
+
+| Check | Outcome |
+|---|---|
+| 33 tests, `npm test` | pass |
+| Type check and production build, `npm run build` | pass |
+| Add, move to inspirations, move back, remove and undo, in the browser | pass |
+| Light and dark theme, desktop and phone width | pass |
+| Open and save with a real file | not checked |
+
+## Technical appendix
+
+| File | What it is |
+|---|---|
+| `index.html`, `src/main.ts`, `src/style.css` | The page: view, dialogs, top bar |
+| `src/profile.ts` | The types, and the changes to a profile |
+| `src/validate.ts` | The check: the schema plus unique ids |
+| `src/explain.ts` | Turns a problem into a sentence about a form field |
+| `src/jsonld.ts` | The JSON-LD export |
+| `src/file.ts` | Open, save and download |
+
+Commands: `npm run dev` (the app), `npm run build` (a static copy in `dist/`), `npm test`, `npm run validate -- <file>`. Node 22.18 or newer runs the TypeScript files directly. The app uses Vite, TypeScript, `ajv` and `ajv-formats`.

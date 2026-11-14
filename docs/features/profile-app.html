@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Profile app</title>
+<meta name="description" content="A page in your browser opens a profile file, edits it, shows it, and saves it back to your disk.">
+<meta name="color-scheme" content="light dark">
+<meta name="source-sha256" content="bc188cf0a727a2cf35fb250582023178723345b0f9ab9c3be6e0fdfebe3367f7">
+<meta name="link-base" content="">
+<script>
+  // Apply a saved theme before first paint so the page never flashes.
+  try { var t = localStorage.getItem("feature-doc-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<style>
+/* Reference sheet: white page, dark text, thin dark lines. Three colours with
+   one meaning each: blue = approved or an annotation, red = wrong or not
+   allowed, grey = secondary. Mono for captions, labels, code, and numbers. */
+:root {
+  color-scheme: light;
+  --bg: #ffffff; --surface: #ffffff; --surface-2: #f4f4f2; --ink: #111111; --ink-2: #3b3b3b; --grey: #6b6b6b;
+  --line: #111111; --line-soft: #cfcfcf; --blue: #1455c0; --blue-bg: #e9f0fc; --red: #c62828; --red-bg: #fcecec;
+  --pastel-1: #fff3d1; --pastel-2: #e4efff; --pastel-3: #e6f6e4;
+  --ruler: 1.4rem;
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", "Cascadia Code", Consolas, "Liberation Mono", monospace;
+  --hand: "Caveat", "Kalam", "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #101214; --surface: #101214; --surface-2: #1a1d21; --ink: #ededed; --ink-2: #c8c8c8; --grey: #9c9c9c;
+    --line: #e4e4e4; --line-soft: #3a3f45; --blue: #82abff; --blue-bg: #16243a; --red: #ff8a8a; --red-bg: #3a1c1c;
+    --pastel-1: #3a3320; --pastel-2: #1c2a3c; --pastel-3: #1f3322;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #101214; --surface: #101214; --surface-2: #1a1d21; --ink: #ededed; --ink-2: #c8c8c8; --grey: #9c9c9c;
+  --line: #e4e4e4; --line-soft: #3a3f45; --blue: #82abff; --blue-bg: #16243a; --red: #ff8a8a; --red-bg: #3a1c1c;
+  --pastel-1: #3a3320; --pastel-2: #1c2a3c; --pastel-3: #1f3322;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); color: var(--ink); font: 15.5px/1.55 var(--font); -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); }
+.topbar { display: flex; justify-content: flex-end; gap: .5rem; max-width: 90rem; margin: 0 auto; padding: .6rem 1rem 0; }
+.topbar button { font: 500 .72rem/1 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); background: var(--surface); border: 1px solid var(--line); border-radius: 0; padding: .45rem .8rem; min-height: 2.75rem; cursor: pointer; }
+.topbar button:hover { color: var(--blue); border-color: var(--blue); }
+.topbar button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.topbar button[hidden] { display: none; }
+
+/* The frame: an outer border with grid references on the edges. */
+.sheet { display: grid; grid-template-columns: var(--ruler) minmax(0, 1fr) var(--ruler); grid-template-rows: var(--ruler) minmax(0, 1fr) var(--ruler); grid-template-areas: "tl top tr" "left drawing right" "bl bottom br"; max-width: 90rem; margin: .6rem auto 2rem; border: 1.5px solid var(--line); background: var(--surface); min-height: calc(100vh - 6rem); }
+@media (min-width: 40rem) { .sheet { margin: .6rem 1rem 2rem; } }
+@media (min-width: 92rem) { .sheet { margin: .6rem auto 2rem; } }
+.ruler { display: grid; font: 600 .66rem/1 var(--mono); color: var(--grey); user-select: none; }
+.ruler span { display: grid; place-items: center; border-color: var(--line-soft); border-style: solid; border-width: 0; }
+.ruler-top { grid-area: top; grid-template-columns: repeat(8, 1fr); border-bottom: 1px solid var(--line); }
+.ruler-bottom { grid-area: bottom; grid-template-columns: repeat(8, 1fr); border-top: 1px solid var(--line); }
+.ruler-top span + span, .ruler-bottom span + span { border-left-width: 1px; }
+.ruler-left { grid-area: left; grid-template-rows: repeat(4, 1fr); border-right: 1px solid var(--line); }
+.ruler-right { grid-area: right; grid-template-rows: repeat(4, 1fr); border-left: 1px solid var(--line); }
+.ruler-left span + span, .ruler-right span + span { border-top-width: 1px; }
+.sheet > .corner { border-color: var(--line); border-style: solid; border-width: 0; }
+.corner-tl { grid-area: tl; border-right-width: 1px; border-bottom-width: 1px; }
+.corner-tr { grid-area: tr; border-left-width: 1px; border-bottom-width: 1px; }
+.corner-bl { grid-area: bl; border-right-width: 1px; border-top-width: 1px; }
+.corner-br { grid-area: br; border-left-width: 1px; border-top-width: 1px; }
+
+/* Panels: bordered cards in a grid; each has a letter chip, a bold title,
+   and a small mono caption. Phones stack them in one column. */
+.drawing { grid-area: drawing; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-flow: dense; gap: 1rem; padding: 1rem; }
+@media (min-width: 48rem) { .drawing { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem; padding: 1.25rem; } .panel.wide, .panel-title, .title-block { grid-column: 1 / -1; } }
+.panel { min-width: 0; border: 1px solid var(--line); background: var(--surface); padding: .9rem 1.05rem 1rem; }
+.panel-title { padding: 1.25rem 1.25rem 1.1rem; }
+.panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; margin: 0 0 .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); }
+.panel-head h2 { margin: 0; font-size: 1.05rem; line-height: 1.3; }
+.chip { display: inline-grid; place-items: center; min-width: 1.5rem; height: 1.5rem; padding: 0 .35rem; margin-right: .55rem; background: var(--ink); color: var(--bg); font: 700 .78rem/1 var(--mono); vertical-align: -.2em; }
+.caption { flex: none; font: 500 .68rem/1.5 var(--mono); letter-spacing: .04em; color: var(--grey); text-align: right; white-space: nowrap; }
+h1, h2, h3, h4, h5, h6 { line-height: 1.25; margin: 1.6em 0 .5em; font-weight: 700; letter-spacing: -.01em; overflow-wrap: anywhere; }
+h1 { font-size: clamp(1.6rem, 1.3rem + 1.4vw, 2.2rem); margin: 0 0 .4rem; }
+h1 + p { font-size: 1.05rem; color: var(--ink-2); margin-top: 0; }
+.panel h3 { font-size: .95rem; margin-top: 1.3em; }
+.panel h3:first-child, .panel-head + h3 { margin-top: .2em; }
+h4, h5, h6 { font-size: .9rem; color: var(--ink-2); }
+a.anchor { color: var(--grey); text-decoration: none; margin-left: .4rem; opacity: 0; font-weight: 400; }
+h2:hover a.anchor, h3:hover a.anchor { opacity: 1; }
+p, ul, ol, table, pre, blockquote, figure { margin: 0 0 .9rem; }
+.panel > :last-child { margin-bottom: 0; }
+ul, ol { padding-left: 1.3rem; }
+li { margin: .2rem 0; }
+li > p { margin: 0 0 .4rem; }
+li > ul, li > ol { margin: .2rem 0 0; }
+a { color: var(--blue); text-underline-offset: 2px; overflow-wrap: anywhere; }
+a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+strong { font-weight: 650; }
+code { font: .86em var(--mono); background: var(--surface-2); border: 1px solid var(--line-soft); padding: .06em .3em; overflow-wrap: anywhere; }
+pre { background: var(--surface-2); border: 1px solid var(--line-soft); padding: .85rem; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; border: 0; padding: 0; font-size: .82rem; overflow-wrap: normal; white-space: pre; }
+hr { border: 0; border-top: 1px solid var(--line-soft); margin: 1.5rem 0; }
+img { max-width: 100%; height: auto; border: 1px solid var(--line-soft); }
+figure { margin: 1rem 0; }
+figcaption { font: .74rem/1.5 var(--mono); color: var(--grey); margin-top: .4rem; }
+
+/* The panel index under the title: letters and names, one line each. */
+.index { margin: 1rem 0 0; }
+.index ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem .6rem; }
+.index a { display: inline-flex; align-items: center; min-height: 2rem; padding: .1rem .5rem .1rem .15rem; border: 1px solid var(--line-soft); color: var(--ink); text-decoration: none; font-size: .82rem; }
+.index a .chip { margin-right: .45rem; }
+.index a:hover, .index a:focus-visible { border-color: var(--blue); color: var(--blue); }
+
+/* Tables: thin rules, mono numbers, status cells. */
+.table-wrap { overflow-x: auto; margin: 0 0 1rem; border: 1px solid var(--line); }
+.table-wrap:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.table-wrap table { margin: 0; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { text-align: left; vertical-align: top; padding: .45rem .65rem; border-bottom: 1px solid var(--line-soft); }
+thead th { background: var(--surface-2); border-bottom: 1px solid var(--line); font: 600 .68rem/1.5 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+tbody tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+td.center, th.center { text-align: center; }
+td.status { font-family: var(--mono); font-size: .82rem; white-space: nowrap; }
+td.status::before { display: inline-block; width: 1.1em; margin-right: .2em; font-weight: 700; text-align: center; }
+td.status-ok { color: var(--blue); } td.status-ok::before { content: "✓"; }
+td.status-bad { color: var(--red); } td.status-bad::before { content: "✗"; }
+td.status-na { color: var(--grey); } td.status-na::before { content: "–"; }
+/* Tables with three or more columns become labelled cards on phones. */
+@media (max-width: 40rem) {
+  .table-wrap.stack { border: 0; overflow: visible; }
+  .table-wrap.stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .table-wrap.stack table, .table-wrap.stack tbody, .table-wrap.stack tr, .table-wrap.stack td { display: block; width: 100%; }
+  .table-wrap.stack tr { border: 1px solid var(--line-soft); margin-bottom: .6rem; padding: .3rem .65rem; background: var(--surface); }
+  .table-wrap.stack td { border: 0; padding: .25rem 0; text-align: left; white-space: normal; }
+  .table-wrap.stack td[data-label]::before { content: attr(data-label); display: block; width: auto; margin: 0; text-align: left; font: 600 .64rem/1.4 var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--grey); }
+  .table-wrap.stack td.status[data-label]::before { content: attr(data-label); }
+}
+
+/* The metadata card: the first table after the title. */
+.meta { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .3rem 1.1rem; margin: 1rem 0 0; padding: .8rem 1rem; border: 1px solid var(--line-soft); font-size: .88rem; }
+.meta dt { font: 600 .66rem/1.9 var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--grey); }
+.meta dd { margin: 0; min-width: 0; }
+@media (max-width: 30rem) { .meta { grid-template-columns: minmax(0, 1fr); gap: 0; } .meta dd { margin-bottom: .45rem; } }
+
+/* Callouts: blue annotation, red limit, grey quote. */
+blockquote { margin-left: 0; padding: .7rem .9rem; border-left: 3px solid var(--grey); background: var(--surface-2); color: var(--ink-2); }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote.callout { color: var(--ink); }
+blockquote.callout-note, blockquote.callout-important, blockquote.callout-tip, blockquote.callout-success { border-color: var(--blue); background: var(--blue-bg); }
+blockquote.callout-limitation, blockquote.callout-warning, blockquote.callout-caution { border-color: var(--red); background: var(--red-bg); }
+blockquote.callout > p:first-child > strong:first-child { font: 700 .68rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; margin-right: .35rem; }
+blockquote.callout-note > p:first-child > strong:first-child, blockquote.callout-important > p:first-child > strong:first-child, blockquote.callout-tip > p:first-child > strong:first-child, blockquote.callout-success > p:first-child > strong:first-child { color: var(--blue); }
+blockquote.callout-limitation > p:first-child > strong:first-child, blockquote.callout-warning > p:first-child > strong:first-child, blockquote.callout-caution > p:first-child > strong:first-child { color: var(--red); }
+
+/* Diagrams: inlined SVG in the whiteboard style. Strokes follow the theme
+   through currentColor; the classes below are what the starter SVG uses. */
+figure.diagram { color: var(--ink); }
+figure.diagram svg { display: block; width: 100%; max-width: 56rem; height: auto; max-height: 36rem; margin: 0 auto; border: 0; }
+.diagram .d-box { fill: var(--surface); stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.diagram .d-group { fill: var(--pastel-1); stroke: none; }
+.diagram .d-group-2 { fill: var(--pastel-2); stroke: none; }
+.diagram .d-group-3 { fill: var(--pastel-3); stroke: none; }
+.diagram .d-arrow { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.diagram .d-marker { fill: currentColor; stroke: none; }
+.diagram .d-label, .diagram text { font-family: var(--hand); font-size: 19px; font-weight: 600; fill: currentColor; stroke: none; }
+.diagram .d-note { font-size: 16px; font-weight: 400; fill: var(--grey); }
+.diagram .d-accent { stroke: var(--blue); } .diagram text.d-accent, .diagram .d-marker.d-accent { fill: var(--blue); stroke: none; }
+.diagram .d-bad { stroke: var(--red); } .diagram text.d-bad, .diagram .d-marker.d-bad { fill: var(--red); stroke: none; }
+
+/* Title block, bottom right. */
+.title-block { justify-self: end; max-width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, auto)); border: 1.5px solid var(--line); margin: .25rem 0 0; }
+@media (min-width: 48rem) { .title-block { grid-template-columns: repeat(4, minmax(0, auto)); } }
+.tb-cell { min-width: 0; padding: .4rem .7rem; border: 0 solid var(--line); border-top-width: 1px; border-left-width: 1px; font-size: .8rem; }
+.tb-cell:nth-child(-n+2) { border-top-width: 0; }
+@media (min-width: 48rem) { .tb-cell:nth-child(-n+4) { border-top-width: 0; } .tb-cell:nth-child(4n+1) { border-left-width: 0; } }
+@media (max-width: 47.99rem) { .tb-cell:nth-child(odd) { border-left-width: 0; } }
+.tb-cell .tb-label { display: block; font: 600 .62rem/1.6 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--grey); }
+.tb-cell .tb-value { display: block; overflow-wrap: anywhere; }
+.tb-title .tb-value { font-weight: 700; }
+.tb-mono .tb-value { font-family: var(--mono); font-size: .78rem; }
+.doc-footer { grid-column: 1 / -1; margin: 0; font: .7rem/1.5 var(--mono); color: var(--grey); text-align: right; }
+
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+@media print {
+  :root, :root[data-theme], :root:not([data-theme="light"]) {
+    color-scheme: light;
+    --bg: #fff; --surface: #fff; --surface-2: #f4f4f4; --ink: #000; --ink-2: #222; --grey: #444; --line: #000; --line-soft: #999;
+    --blue: #1a4a8a; --blue-bg: #fff; --red: #8a1c1c; --red-bg: #fff; --pastel-1: #fff; --pastel-2: #fff; --pastel-3: #fff;
+  }
+  .topbar { display: none; }
+  .sheet { margin: 0; min-height: 0; }
+  .panel, table, pre, blockquote, figure, .meta, tr, .title-block { break-inside: avoid; }
+  h2, h3 { break-after: avoid; }
+  a { color: inherit; } .table-wrap { overflow: visible; }
+  a.anchor { display: none; }
+}
+@media (forced-colors: active) {
+  .sheet, .panel, .meta, blockquote, .title-block, .tb-cell, .index a, .topbar button, .table-wrap, .ruler span { border-color: CanvasText; }
+  .chip { background: CanvasText; color: Canvas; forced-color-adjust: none; }
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <button type="button" data-action="toggle">Dark theme</button>
+  <button type="button" data-action="system" hidden>Use system theme</button>
+</div>
+<div class="sheet">
+  <div class="corner corner-tl" aria-hidden="true"></div>
+  <div class="ruler ruler-top" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+  <div class="corner corner-tr" aria-hidden="true"></div>
+  <div class="ruler ruler-left" aria-hidden="true"><span>A</span><span>B</span><span>C</span><span>D</span></div>
+  <main class="drawing">
+<header class="panel panel-title" id="top">
+<h1>Profile app</h1>
+<p>A page in your browser opens a profile file, edits it, shows it, and saves it back to your disk.</p>
+<dl class="meta"><dt>Status</dt><dd>In review as of 2026-11-13. The narrated video is not made yet</dd><dt>Area</dt><dd>Browser app</dd><dt>Delivered in</dt><dd>Issue #2, &quot;Build the app to edit and view a profile&quot;</dd><dt>Related</dt><dd><a href="profile-format.html">Profile format</a></dd></dl>
+<nav class="index" aria-label="On this sheet"><ol><li><a href="#at-a-glance"><span class="chip">A</span> <span>At a glance</span></a></li><li><a href="#why-it-exists"><span class="chip">B</span> <span>Why it exists</span></a></li><li><a href="#how-it-works"><span class="chip">C</span> <span>How it works</span></a></li><li><a href="#what-it-guarantees"><span class="chip">D</span> <span>What it guarantees</span></a></li><li><a href="#what-it-does-not-do"><span class="chip">E</span> <span>What it does not do</span></a></li><li><a href="#when-something-goes-wrong"><span class="chip">F</span> <span>When something goes wrong</span></a></li><li><a href="#key-decisions"><span class="chip">G</span> <span>Key decisions</span></a></li><li><a href="#verification"><span class="chip">H</span> <span>Verification</span></a></li><li><a href="#technical-appendix"><span class="chip">I</span> <span>Technical appendix</span></a></li></ol></nav>
+</header>
+<section class="panel" id="at-a-glance" aria-labelledby="at-a-glance-heading">
+<div class="panel-head"><h2 id="at-a-glance-heading"><span class="chip">A</span> At a glance<a class="anchor" href="#at-a-glance" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">summary</span></div>
+<ul><li>The app runs in the browser. It has no account and no backend. Your file is the store.</li><li>It shows inspirations and taste references in two separate lists.</li><li>It checks every change against the format. A profile that is not valid never reaches your file.</li><li><strong>Move to inspirations</strong> asks what the entry gave and which work credits it.</li><li><strong>Export JSON-LD</strong> writes the profile as schema.org data for a web page.</li></ul>
+</section>
+<section class="panel" id="why-it-exists" aria-labelledby="why-it-exists-heading">
+<div class="panel-head"><h2 id="why-it-exists-heading"><span class="chip">B</span> Why it exists<a class="anchor" href="#why-it-exists" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">problem</span></div>
+<p>A profile is a JSON file, and JSON is slow to edit by hand. The app gives the file a form and a readable view, and it keeps the rule of the format: a taste reference is never shown as an influence. It is issue #2.</p>
+</section>
+<section class="panel wide" id="how-it-works" aria-labelledby="how-it-works-heading">
+<div class="panel-head"><h2 id="how-it-works-heading"><span class="chip">C</span> How it works<a class="anchor" href="#how-it-works" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">procedure</span></div>
+<p>Start the app, then open a file or start a new one.</p>
+<ol><li>Run <code>npm install</code>, then <code>npm run dev</code>. Open the address that the command prints.</li><li>Select <strong>New profile</strong>, <strong>Open a file</strong> or <strong>See the example</strong>.</li><li>Select <strong>Add</strong> above a list to add an entry to that list.</li><li>Select <strong>Save</strong>. The top bar shows &quot;not saved&quot; until you do.</li></ol>
+<h3 id="add-an-entry">Add an entry<a class="anchor" href="#add-an-entry" aria-hidden="true" tabindex="-1">#</a></h3>
+<p>The form asks for a name, a kind, a date, the relation, and one or more links. Tags and notes are optional. The app makes the entry's <code>id</code> from its name, and never changes it.</p>
+<p>If you select <strong>Inspiration</strong>, the form also asks for two things:</p>
+<div class="table-wrap"><table><thead><tr><th scope="col">Field</th><th scope="col">What to write</th></tr></thead><tbody><tr><td data-label="Field">What it gave</td><td data-label="What to write">One sentence: what your work took from it</td></tr><tr><td data-label="Field">Credited in</td><td data-label="What to write">The work of yours that credits it. One work on each line: a name, then <code>\|</code> and a link if there is one</td></tr></tbody></table></div>
+<h3 id="move-a-taste-reference-to-inspirations">Move a taste reference to inspirations<a class="anchor" href="#move-a-taste-reference-to-inspirations" aria-hidden="true" tabindex="-1">#</a></h3>
+<ol><li>Select <strong>Move to inspirations</strong> on the entry's card.</li><li>Write what it gave, and the work that credits it.</li><li>Select <strong>Save</strong>. The entry moves to the other list. It keeps its <code>id</code> and its date.</li></ol>
+<p>To move an entry back, select <strong>Edit</strong> and change the relation to <strong>Taste reference</strong>. The app then drops what it gave and the credits.</p>
+<h3 id="remove-an-entry">Remove an entry<a class="anchor" href="#remove-an-entry" aria-hidden="true" tabindex="-1">#</a></h3>
+<p>Select <strong>Remove</strong>. A message at the bottom of the page offers <strong>Undo</strong> for 8 seconds.</p>
+<h3 id="export-json-ld">Export JSON-LD<a class="anchor" href="#export-json-ld" aria-hidden="true" tabindex="-1">#</a></h3>
+<p><strong>Export JSON-LD</strong> downloads a <code>.jsonld</code> file with a schema.org graph:</p>
+<div class="table-wrap"><table><thead><tr><th scope="col">Node</th><th scope="col">What it holds</th></tr></thead><tbody><tr><td data-label="Node">The owner</td><td data-label="What it holds">A <code>Person</code> or <code>Organization</code> with its links</td></tr><tr><td data-label="Node"><code>#inspirations</code></td><td data-label="What it holds">An <code>ItemList</code>. Each item is the entity, with what it gave as the item's description</td></tr><tr><td data-label="Node"><code>#taste-references</code></td><td data-label="What it holds">An <code>ItemList</code>. Each item is the entity only</td></tr><tr><td data-label="Node">One <code>CreativeWork</code> for each crediting work</td><td data-label="What it holds">The owner as <code>creator</code>, and the inspirations it credits as <code>mentions</code></td></tr></tbody></table></div>
+<pre><code class="language-json">{
+  &quot;@type&quot;: &quot;ListItem&quot;,
+  &quot;position&quot;: 2,
+  &quot;item&quot;: {
+    &quot;@type&quot;: &quot;CreativeWork&quot;,
+    &quot;@id&quot;: &quot;#entry-the-quiet-grid&quot;,
+    &quot;name&quot;: &quot;The Quiet Grid&quot;,
+    &quot;url&quot;: &quot;https://books.example/the-quiet-grid&quot;,
+    &quot;sameAs&quot;: [&quot;https://books.example/the-quiet-grid&quot;],
+    &quot;keywords&quot;: &quot;layout, restraint&quot;
+  },
+  &quot;description&quot;: &quot;The eight-column layout and its wide outer margins.&quot;
+}</code></pre>
+<p><em>Illustrative example, not real data.</em></p>
+</section>
+<section class="panel" id="what-it-guarantees" aria-labelledby="what-it-guarantees-heading">
+<div class="panel-head"><h2 id="what-it-guarantees-heading"><span class="chip">D</span> What it guarantees<a class="anchor" href="#what-it-guarantees" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">checked promises</span></div>
+<p>Each promise is checked by a test in <code>test/app.test.mjs</code>.</p>
+<ul><li>The app writes only valid profiles. Every add, edit and move runs the same check as <code>npm run validate</code>.</li><li>A taste reference never carries what it gave, in the view, the file or the export.</li><li>An entry keeps its <code>id</code> and its date when it moves to inspirations.</li><li>The saved file reads back as the same profile.</li><li>The export leaves your notes out.</li></ul>
+</section>
+<section class="panel" id="what-it-does-not-do" aria-labelledby="what-it-does-not-do-heading">
+<div class="panel-head"><h2 id="what-it-does-not-do-heading"><span class="chip">E</span> What it does not do<a class="anchor" href="#what-it-does-not-do" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">limits</span></div>
+<ul><li>It does not save in place in every browser. Chrome and Edge write back to the file you opened. Firefox and Safari download a new copy on each save.</li><li>It does not open a file that is not valid. It lists the problems, and you fix the file by hand.</li><li>It does not keep a draft. If you close the tab before you save, the changes are gone. The browser asks first.</li><li>It does not edit the <code>id</code> of an entry, or reorder entries.</li><li>It does not format notes. Notes are plain text until the editor field of issue #3 exists.</li><li>It is not hosted anywhere. You run it from a checkout.</li></ul>
+<blockquote class="callout callout-limitation"><p><strong>Not verified:</strong> Open and save through the browser's file picker, and the Firefox and Safari download path. The checks in the browser used the built-in example.</p></blockquote>
+</section>
+<section class="panel wide" id="when-something-goes-wrong" aria-labelledby="when-something-goes-wrong-heading">
+<div class="panel-head"><h2 id="when-something-goes-wrong-heading"><span class="chip">F</span> When something goes wrong<a class="anchor" href="#when-something-goes-wrong" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">recovery</span></div>
+<div class="table-wrap"><table><thead><tr><th scope="col">What you see</th><th scope="col">What to do</th></tr></thead><tbody><tr><td data-label="What you see">&quot;This file is not a valid profile&quot;</td><td data-label="What to do">Fix the listed problems in the file, then open it again. <code>npm run validate -- &lt;file&gt;</code> shows the same list</td></tr><tr><td data-label="What you see">&quot;Links: add one or more.&quot;</td><td data-label="What to do">Give the entry one or more links that start with <code>http://</code> or <code>https://</code></td></tr><tr><td data-label="What you see">&quot;Credited in: add one or more.&quot;</td><td data-label="What to do">An inspiration must name the work that credits it. If no work credits it yet, keep it a taste reference</td></tr><tr><td data-label="What you see">Save downloads a file each time</td><td data-label="What to do">Your browser cannot write to the file. Replace the old file with the download</td></tr></tbody></table></div>
+</section>
+<section class="panel" id="key-decisions" aria-labelledby="key-decisions-heading">
+<div class="panel-head"><h2 id="key-decisions-heading"><span class="chip">G</span> Key decisions<a class="anchor" href="#key-decisions" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">design records</span></div>
+<ul><li><strong>No framework.</strong> The app is TypeScript and the DOM. Issue #2 says to add a framework only if the editor field needs one.</li><li><strong>One check for the app, the tests and the command line.</strong> All three import <code>src/validate.ts</code>, so they cannot disagree.</li><li><strong>Changes are pure functions.</strong> Each one in <code>src/profile.ts</code> returns a new profile. That makes Undo one line, and the tests run without a browser.</li><li><strong>Two lists in the export, not one list with a flag.</strong> A reader of the JSON-LD cannot mistake a taste reference for a credit.</li></ul>
+</section>
+<section class="panel wide" id="verification" aria-labelledby="verification-heading">
+<div class="panel-head"><h2 id="verification-heading"><span class="chip">H</span> Verification<a class="anchor" href="#verification" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">evidence</span></div>
+<div class="table-wrap"><table><thead><tr><th scope="col">Check</th><th scope="col">Outcome</th></tr></thead><tbody><tr><td data-label="Check">33 tests, <code>npm test</code></td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">Type check and production build, <code>npm run build</code></td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">Add, move to inspirations, move back, remove and undo, in the browser</td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">Light and dark theme, desktop and phone width</td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">Open and save with a real file</td><td class="status status-na" data-label="Outcome">not checked</td></tr></tbody></table></div>
+</section>
+<section class="panel wide" id="technical-appendix" aria-labelledby="technical-appendix-heading">
+<div class="panel-head"><h2 id="technical-appendix-heading"><span class="chip">I</span> Technical appendix<a class="anchor" href="#technical-appendix" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">reference</span></div>
+<div class="table-wrap"><table><thead><tr><th scope="col">File</th><th scope="col">What it is</th></tr></thead><tbody><tr><td data-label="File"><code>index.html</code>, <code>src/main.ts</code>, <code>src/style.css</code></td><td data-label="What it is">The page: view, dialogs, top bar</td></tr><tr><td data-label="File"><code>src/profile.ts</code></td><td data-label="What it is">The types, and the changes to a profile</td></tr><tr><td data-label="File"><code>src/validate.ts</code></td><td data-label="What it is">The check: the schema plus unique ids</td></tr><tr><td data-label="File"><code>src/explain.ts</code></td><td data-label="What it is">Turns a problem into a sentence about a form field</td></tr><tr><td data-label="File"><code>src/jsonld.ts</code></td><td data-label="What it is">The JSON-LD export</td></tr><tr><td data-label="File"><code>src/file.ts</code></td><td data-label="What it is">Open, save and download</td></tr></tbody></table></div>
+<p>Commands: <code>npm run dev</code> (the app), <code>npm run build</code> (a static copy in <code>dist/</code>), <code>npm test</code>, <code>npm run validate -- &lt;file&gt;</code>. Node 22.18 or newer runs the TypeScript files directly. The app uses Vite, TypeScript, <code>ajv</code> and <code>ajv-formats</code>.</p>
+</section>
+    <footer class="title-block" aria-label="Title block">
+      <div class="tb-cell tb-title"><span class="tb-label">Title</span><span class="tb-value">Profile app</span></div>
+      <div class="tb-cell tb-mono"><span class="tb-label">Source</span><span class="tb-value">docs/features/profile-app.md</span></div>
+      <div class="tb-cell"><span class="tb-label">Owner</span><span class="tb-value">—</span></div>
+      <div class="tb-cell"><span class="tb-label">Status</span><span class="tb-value">In review as of 2026-11-13. The narrated video is not made yet</span></div>
+      <div class="tb-cell tb-mono"><span class="tb-label">Rev</span><span class="tb-value">bc188cf0</span></div>
+      <div class="tb-cell tb-mono"><span class="tb-label">Rendered</span><span class="tb-value">2026-11-14</span></div>
+      <div class="tb-cell tb-mono"><span class="tb-label">Sheet</span><span class="tb-value">1 of 1</span></div>
+      <div class="tb-cell tb-mono"><span class="tb-label">Note</span><span class="tb-value">Markdown is the source of record</span></div>
+    </footer>
+    <p class="doc-footer">Rendered from <code>profile-app.md</code> on 2026-11-14. The Markdown file is the source of record.</p>
+  </main>
+  <div class="ruler ruler-right" aria-hidden="true"><span>A</span><span>B</span><span>C</span><span>D</span></div>
+  <div class="corner corner-bl" aria-hidden="true"></div>
+  <div class="ruler ruler-bottom" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+  <div class="corner corner-br" aria-hidden="true"></div>
+</div>
+<script>
+(function () {
+  var root = document.documentElement, key = "feature-doc-theme";
+  var toggle = document.querySelector('[data-action="toggle"]'), system = document.querySelector('[data-action="system"]');
+  var media = window.matchMedia("(prefers-color-scheme: dark)");
+  function effective() { return root.dataset.theme || (media.matches ? "dark" : "light"); }
+  function sync() {
+    // The visible text is the accessible name: it names the theme a click switches to.
+    toggle.textContent = effective() === "dark" ? "Light theme" : "Dark theme";
+    system.hidden = !root.dataset.theme;
+  }
+  toggle.addEventListener("click", function () {
+    var next = effective() === "dark" ? "light" : "dark";
+    root.dataset.theme = next;
+    try { localStorage.setItem(key, next); } catch (e) {}
+    sync();
+  });
+  system.addEventListener("click", function () {
+    delete root.dataset.theme;
+    try { localStorage.removeItem(key); } catch (e) {}
+    sync();
+    toggle.focus();
+  });
+  if (media.addEventListener) media.addEventListener("change", sync);
+  sync();
+  // Only tables that actually scroll become a focusable, named region.
+  function regions() {
+    document.querySelectorAll(".table-wrap").forEach(function (wrap) {
+      var scrolls = wrap.scrollWidth > wrap.clientWidth + 1;
+      if (scrolls) {
+        wrap.setAttribute("tabindex", "0");
+        wrap.setAttribute("role", "region");
+        var head = wrap.querySelector("thead");
+        wrap.setAttribute("aria-label", head ? "Table: " + head.textContent.trim().replace(/\s+/g, ", ").slice(0, 80) : "Table");
+      } else {
+        wrap.removeAttribute("tabindex");
+        wrap.removeAttribute("role");
+        wrap.removeAttribute("aria-label");
+      }
+    });
+  }
+  regions();
+  window.addEventListener("resize", regions);
+})();
+</script>
+</body>
+</html>

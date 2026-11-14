@@ -2,7 +2,7 @@
 
 Keep a taste profile: the people and work whose taste you watch, and the ones that shaped your own work, with credit.
 
-Status: the file format is defined. The app is not built yet. The open issues describe the rest of version 1.
+Status: the file format and the app work. The app is not hosted yet: you run it from a checkout. The open issues describe the rest of version 1.
 
 ## The idea
 
@@ -15,6 +15,17 @@ An entry moves from taste reference to inspiration when it shapes a piece of wor
 
 Each entry is a schema.org `Person`, `Organization` or `CreativeWork` with `sameAs` links to the entity's own site and profiles, so the same entity is recognisable wherever it appears.
 
+## The app
+
+Open a profile file in your browser, edit it, and save it back. There is no account and no backend.
+
+```bash
+npm install
+npm run dev
+```
+
+Then open the address that the command prints. [Guide to the app](docs/features/profile-app.md).
+
 ## The format
 
 A profile is one JSON file.
@@ -23,10 +34,9 @@ A profile is one JSON file.
 - [The schema](schema/profile.schema.json), JSON Schema draft 2020-12
 - [An example profile](examples/profile.json), with made-up entities
 
-Check a profile:
+Check a profile from the command line:
 
 ```bash
-npm install
 npm run validate -- examples/profile.json
 ```
 
