@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editor field</title>
+<meta name="description" content="A small box for formatted notes that any web page can embed with one call.">
+<meta name="color-scheme" content="light dark">
+<meta name="source-sha256" content="3b149de013c8fd1e37d5881a3d35b70d87ea37442171e049d784b894ffc20982">
+<meta name="link-base" content="">
+<script>
+  // Apply a saved theme before first paint so the page never flashes.
+  try { var t = localStorage.getItem("feature-doc-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<style>
+/* Reference sheet: white page, dark text, thin dark lines. Three colours with
+   one meaning each: blue = approved or an annotation, red = wrong or not
+   allowed, grey = secondary. Mono for captions, labels, code, and numbers. */
+:root {
+  color-scheme: light;
+  --bg: #ffffff; --surface: #ffffff; --surface-2: #f4f4f2; --ink: #111111; --ink-2: #3b3b3b; --grey: #6b6b6b;
+  --line: #111111; --line-soft: #cfcfcf; --blue: #1455c0; --blue-bg: #e9f0fc; --red: #c62828; --red-bg: #fcecec;
+  --pastel-1: #fff3d1; --pastel-2: #e4efff; --pastel-3: #e6f6e4;
+  --ruler: 1.4rem;
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", "Cascadia Code", Consolas, "Liberation Mono", monospace;
+  --hand: "Caveat", "Kalam", "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #101214; --surface: #101214; --surface-2: #1a1d21; --ink: #ededed; --ink-2: #c8c8c8; --grey: #9c9c9c;
+    --line: #e4e4e4; --line-soft: #3a3f45; --blue: #82abff; --blue-bg: #16243a; --red: #ff8a8a; --red-bg: #3a1c1c;
+    --pastel-1: #3a3320; --pastel-2: #1c2a3c; --pastel-3: #1f3322;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #101214; --surface: #101214; --surface-2: #1a1d21; --ink: #ededed; --ink-2: #c8c8c8; --grey: #9c9c9c;
+  --line: #e4e4e4; --line-soft: #3a3f45; --blue: #82abff; --blue-bg: #16243a; --red: #ff8a8a; --red-bg: #3a1c1c;
+  --pastel-1: #3a3320; --pastel-2: #1c2a3c; --pastel-3: #1f3322;
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); color: var(--ink); font: 15.5px/1.55 var(--font); -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); }
+.topbar { display: flex; justify-content: flex-end; gap: .5rem; max-width: 90rem; margin: 0 auto; padding: .6rem 1rem 0; }
+.topbar button { font: 500 .72rem/1 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); background: var(--surface); border: 1px solid var(--line); border-radius: 0; padding: .45rem .8rem; min-height: 2.75rem; cursor: pointer; }
+.topbar button:hover { color: var(--blue); border-color: var(--blue); }
+.topbar button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.topbar button[hidden] { display: none; }
+
+/* The frame: an outer border with grid references on the edges. */
+.sheet { display: grid; grid-template-columns: var(--ruler) minmax(0, 1fr) var(--ruler); grid-template-rows: var(--ruler) minmax(0, 1fr) var(--ruler); grid-template-areas: "tl top tr" "left drawing right" "bl bottom br"; max-width: 90rem; margin: .6rem auto 2rem; border: 1.5px solid var(--line); background: var(--surface); min-height: calc(100vh - 6rem); }
+@media (min-width: 40rem) { .sheet { margin: .6rem 1rem 2rem; } }
+@media (min-width: 92rem) { .sheet { margin: .6rem auto 2rem; } }
+.ruler { display: grid; font: 600 .66rem/1 var(--mono); color: var(--grey); user-select: none; }
+.ruler span { display: grid; place-items: center; border-color: var(--line-soft); border-style: solid; border-width: 0; }
+.ruler-top { grid-area: top; grid-template-columns: repeat(8, 1fr); border-bottom: 1px solid var(--line); }
+.ruler-bottom { grid-area: bottom; grid-template-columns: repeat(8, 1fr); border-top: 1px solid var(--line); }
+.ruler-top span + span, .ruler-bottom span + span { border-left-width: 1px; }
+.ruler-left { grid-area: left; grid-template-rows: repeat(4, 1fr); border-right: 1px solid var(--line); }
+.ruler-right { grid-area: right; grid-template-rows: repeat(4, 1fr); border-left: 1px solid var(--line); }
+.ruler-left span + span, .ruler-right span + span { border-top-width: 1px; }
+.sheet > .corner { border-color: var(--line); border-style: solid; border-width: 0; }
+.corner-tl { grid-area: tl; border-right-width: 1px; border-bottom-width: 1px; }
+.corner-tr { grid-area: tr; border-left-width: 1px; border-bottom-width: 1px; }
+.corner-bl { grid-area: bl; border-right-width: 1px; border-top-width: 1px; }
+.corner-br { grid-area: br; border-left-width: 1px; border-top-width: 1px; }
+
+/* Panels: bordered cards in a grid; each has a letter chip, a bold title,
+   and a small mono caption. Phones stack them in one column. */
+.drawing { grid-area: drawing; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-flow: dense; gap: 1rem; padding: 1rem; }
+@media (min-width: 48rem) { .drawing { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem; padding: 1.25rem; } .panel.wide, .panel-title, .title-block { grid-column: 1 / -1; } }
+.panel { min-width: 0; border: 1px solid var(--line); background: var(--surface); padding: .9rem 1.05rem 1rem; }
+.panel-title { padding: 1.25rem 1.25rem 1.1rem; }
+.panel-head { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; margin: 0 0 .75rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); }
+.panel-head h2 { margin: 0; font-size: 1.05rem; line-height: 1.3; }
+.chip { display: inline-grid; place-items: center; min-width: 1.5rem; height: 1.5rem; padding: 0 .35rem; margin-right: .55rem; background: var(--ink); color: var(--bg); font: 700 .78rem/1 var(--mono); vertical-align: -.2em; }
+.caption { flex: none; font: 500 .68rem/1.5 var(--mono); letter-spacing: .04em; color: var(--grey); text-align: right; white-space: nowrap; }
+h1, h2, h3, h4, h5, h6 { line-height: 1.25; margin: 1.6em 0 .5em; font-weight: 700; letter-spacing: -.01em; overflow-wrap: anywhere; }
+h1 { font-size: clamp(1.6rem, 1.3rem + 1.4vw, 2.2rem); margin: 0 0 .4rem; }
+h1 + p { font-size: 1.05rem; color: var(--ink-2); margin-top: 0; }
+.panel h3 { font-size: .95rem; margin-top: 1.3em; }
+.panel h3:first-child, .panel-head + h3 { margin-top: .2em; }
+h4, h5, h6 { font-size: .9rem; color: var(--ink-2); }
+a.anchor { color: var(--grey); text-decoration: none; margin-left: .4rem; opacity: 0; font-weight: 400; }
+h2:hover a.anchor, h3:hover a.anchor { opacity: 1; }
+p, ul, ol, table, pre, blockquote, figure { margin: 0 0 .9rem; }
+.panel > :last-child { margin-bottom: 0; }
+ul, ol { padding-left: 1.3rem; }
+li { margin: .2rem 0; }
+li > p { margin: 0 0 .4rem; }
+li > ul, li > ol { margin: .2rem 0 0; }
+a { color: var(--blue); text-underline-offset: 2px; overflow-wrap: anywhere; }
+a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+strong { font-weight: 650; }
+code { font: .86em var(--mono); background: var(--surface-2); border: 1px solid var(--line-soft); padding: .06em .3em; overflow-wrap: anywhere; }
+pre { background: var(--surface-2); border: 1px solid var(--line-soft); padding: .85rem; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; border: 0; padding: 0; font-size: .82rem; overflow-wrap: normal; white-space: pre; }
+hr { border: 0; border-top: 1px solid var(--line-soft); margin: 1.5rem 0; }
+img { max-width: 100%; height: auto; border: 1px solid var(--line-soft); }
+figure { margin: 1rem 0; }
+figcaption { font: .74rem/1.5 var(--mono); color: var(--grey); margin-top: .4rem; }
+
+/* The panel index under the title: letters and names, one line each. */
+.index { margin: 1rem 0 0; }
+.index ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem .6rem; }
+.index a { display: inline-flex; align-items: center; min-height: 2rem; padding: .1rem .5rem .1rem .15rem; border: 1px solid var(--line-soft); color: var(--ink); text-decoration: none; font-size: .82rem; }
+.index a .chip { margin-right: .45rem; }
+.index a:hover, .index a:focus-visible { border-color: var(--blue); color: var(--blue); }
+
+/* Tables: thin rules, mono numbers, status cells. */
+.table-wrap { overflow-x: auto; margin: 0 0 1rem; border: 1px solid var(--line); }
+.table-wrap:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.table-wrap table { margin: 0; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { text-align: left; vertical-align: top; padding: .45rem .65rem; border-bottom: 1px solid var(--line-soft); }
+thead th { background: var(--surface-2); border-bottom: 1px solid var(--line); font: 600 .68rem/1.5 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+tbody tr:last-child td { border-bottom: 0; }
+td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+td.center, th.center { text-align: center; }
+td.status { font-family: var(--mono); font-size: .82rem; white-space: nowrap; }
+td.status::before { display: inline-block; width: 1.1em; margin-right: .2em; font-weight: 700; text-align: center; }
+td.status-ok { color: var(--blue); } td.status-ok::before { content: "✓"; }
+td.status-bad { color: var(--red); } td.status-bad::before { content: "✗"; }
+td.status-na { color: var(--grey); } td.status-na::before { content: "–"; }
+/* Tables with three or more columns become labelled cards on phones. */
+@media (max-width: 40rem) {
+  .table-wrap.stack { border: 0; overflow: visible; }
+  .table-wrap.stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .table-wrap.stack table, .table-wrap.stack tbody, .table-wrap.stack tr, .table-wrap.stack td { display: block; width: 100%; }
+  .table-wrap.stack tr { border: 1px solid var(--line-soft); margin-bottom: .6rem; padding: .3rem .65rem; background: var(--surface); }
+  .table-wrap.stack td { border: 0; padding: .25rem 0; text-align: left; white-space: normal; }
+  .table-wrap.stack td[data-label]::before { content: attr(data-label); display: block; width: auto; margin: 0; text-align: left; font: 600 .64rem/1.4 var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--grey); }
+  .table-wrap.stack td.status[data-label]::before { content: attr(data-label); }
+}
+
+/* The metadata card: the first table after the title. */
+.meta { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .3rem 1.1rem; margin: 1rem 0 0; padding: .8rem 1rem; border: 1px solid var(--line-soft); font-size: .88rem; }
+.meta dt { font: 600 .66rem/1.9 var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--grey); }
+.meta dd { margin: 0; min-width: 0; }
+@media (max-width: 30rem) { .meta { grid-template-columns: minmax(0, 1fr); gap: 0; } .meta dd { margin-bottom: .45rem; } }
+
+/* Callouts: blue annotation, red limit, grey quote. */
+blockquote { margin-left: 0; padding: .7rem .9rem; border-left: 3px solid var(--grey); background: var(--surface-2); color: var(--ink-2); }
+blockquote p:last-child { margin-bottom: 0; }
+blockquote.callout { color: var(--ink); }
+blockquote.callout-note, blockquote.callout-important, blockquote.callout-tip, blockquote.callout-success { border-color: var(--blue); background: var(--blue-bg); }
+blockquote.callout-limitation, blockquote.callout-warning, blockquote.callout-caution { border-color: var(--red); background: var(--red-bg); }
+blockquote.callout > p:first-child > strong:first-child { font: 700 .68rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; margin-right: .35rem; }
+blockquote.callout-note > p:first-child > strong:first-child, blockquote.callout-important > p:first-child > strong:first-child, blockquote.callout-tip > p:first-child > strong:first-child, blockquote.callout-success > p:first-child > strong:first-child { color: var(--blue); }
+blockquote.callout-limitation > p:first-child > strong:first-child, blockquote.callout-warning > p:first-child > strong:first-child, blockquote.callout-caution > p:first-child > strong:first-child { color: var(--red); }
+
+/* Diagrams: inlined SVG in the whiteboard style. Strokes follow the theme
+   through currentColor; the classes below are what the starter SVG uses. */
+figure.diagram { color: var(--ink); }
+figure.diagram svg { display: block; width: 100%; max-width: 56rem; height: auto; max-height: 36rem; margin: 0 auto; border: 0; }
+.diagram .d-box { fill: var(--surface); stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.diagram .d-group { fill: var(--pastel-1); stroke: none; }
+.diagram .d-group-2 { fill: var(--pastel-2); stroke: none; }
+.diagram .d-group-3 { fill: var(--pastel-3); stroke: none; }
+.diagram .d-arrow { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.diagram .d-marker { fill: currentColor; stroke: none; }
+.diagram .d-label, .diagram text { font-family: var(--hand); font-size: 19px; font-weight: 600; fill: currentColor; stroke: none; }
+.diagram .d-note { font-size: 16px; font-weight: 400; fill: var(--grey); }
+.diagram .d-accent { stroke: var(--blue); } .diagram text.d-accent, .diagram .d-marker.d-accent { fill: var(--blue); stroke: none; }
+.diagram .d-bad { stroke: var(--red); } .diagram text.d-bad, .diagram .d-marker.d-bad { fill: var(--red); stroke: none; }
+
+/* Title block, bottom right. */
+.title-block { justify-self: end; max-width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, auto)); border: 1.5px solid var(--line); margin: .25rem 0 0; }
+@media (min-width: 48rem) { .title-block { grid-template-columns: repeat(4, minmax(0, auto)); } }
+.tb-cell { min-width: 0; padding: .4rem .7rem; border: 0 solid var(--line); border-top-width: 1px; border-left-width: 1px; font-size: .8rem; }
+.tb-cell:nth-child(-n+2) { border-top-width: 0; }
+@media (min-width: 48rem) { .tb-cell:nth-child(-n+4) { border-top-width: 0; } .tb-cell:nth-child(4n+1) { border-left-width: 0; } }
+@media (max-width: 47.99rem) { .tb-cell:nth-child(odd) { border-left-width: 0; } }
+.tb-cell .tb-label { display: block; font: 600 .62rem/1.6 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--grey); }
+.tb-cell .tb-value { display: block; overflow-wrap: anywhere; }
+.tb-title .tb-value { font-weight: 700; }
+.tb-mono .tb-value { font-family: var(--mono); font-size: .78rem; }
+.doc-footer { grid-column: 1 / -1; margin: 0; font: .7rem/1.5 var(--mono); color: var(--grey); text-align: right; }
+
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+@media print {
+  :root, :root[data-theme], :root:not([data-theme="light"]) {
+    color-scheme: light;
+    --bg: #fff; --surface: #fff; --surface-2: #f4f4f4; --ink: #000; --ink-2: #222; --grey: #444; --line: #000; --line-soft: #999;
+    --blue: #1a4a8a; --blue-bg: #fff; --red: #8a1c1c; --red-bg: #fff; --pastel-1: #fff; --pastel-2: #fff; --pastel-3: #fff;
+  }
+  .topbar { display: none; }
+  .sheet { margin: 0; min-height: 0; }
+  .panel, table, pre, blockquote, figure, .meta, tr, .title-block { break-inside: avoid; }
+  h2, h3 { break-after: avoid; }
+  a { color: inherit; } .table-wrap { overflow: visible; }
+  a.anchor { display: none; }
+}
+@media (forced-colors: active) {
+  .sheet, .panel, .meta, blockquote, .title-block, .tb-cell, .index a, .topbar button, .table-wrap, .ruler span { border-color: CanvasText; }
+  .chip { background: CanvasText; color: Canvas; forced-color-adjust: none; }
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <button type="button" data-action="toggle">Dark theme</button>
+  <button type="button" data-action="system" hidden>Use system theme</button>
+</div>
+<div class="sheet">
+  <div class="corner corner-tl" aria-hidden="true"></div>
+  <div class="ruler ruler-top" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+  <div class="corner corner-tr" aria-hidden="true"></div>
+  <div class="ruler ruler-left" aria-hidden="true"><span>A</span><span>B</span><span>C</span><span>D</span></div>
+  <main class="drawing">
+<header class="panel panel-title" id="top">
+<h1>Editor field</h1>
+<p>A small box for formatted notes that any web page can embed with one call.</p>
+<dl class="meta"><dt>Status</dt><dd>In review as of 2026-11-14</dd><dt>Area</dt><dd><code>packages/editor-field</code>, and the Notes field of the app</dd><dt>Delivered in</dt><dd>Issue #3, &quot;Write entry notes in an embeddable editor field&quot;</dd><dt>Related</dt><dd><a href="profile-app.html">Profile app</a>, <a href="profile-format.html">Profile format</a></dd></dl>
+<nav class="index" aria-label="On this sheet"><ol><li><a href="#at-a-glance"><span class="chip">A</span> <span>At a glance</span></a></li><li><a href="#why-it-exists"><span class="chip">B</span> <span>Why it exists</span></a></li><li><a href="#how-it-works"><span class="chip">C</span> <span>How it works</span></a></li><li><a href="#what-it-guarantees"><span class="chip">D</span> <span>What it guarantees</span></a></li><li><a href="#what-it-does-not-do"><span class="chip">E</span> <span>What it does not do</span></a></li><li><a href="#when-something-goes-wrong"><span class="chip">F</span> <span>When something goes wrong</span></a></li><li><a href="#key-decisions"><span class="chip">G</span> <span>Key decisions</span></a></li><li><a href="#verification"><span class="chip">H</span> <span>Verification</span></a></li><li><a href="#technical-appendix"><span class="chip">I</span> <span>Technical appendix</span></a></li></ol></nav>
+</header>
+<section class="panel" id="at-a-glance" aria-labelledby="at-a-glance-heading">
+<div class="panel-head"><h2 id="at-a-glance-heading"><span class="chip">A</span> At a glance<a class="anchor" href="#at-a-glance" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">summary</span></div>
+<ul><li>One call makes the field: <code>createEditor({ mount, document })</code>. One call removes it: <code>destroy()</code>.</li><li>It does paragraphs, bold, italic, links and bullet lists. Nothing else.</li><li>The document is a string in a small Markdown subset. Plain text is valid, so notes from format 1.0 open unchanged.</li><li>It is built on Tiptap's open-source packages, on ProseMirror. It needs no framework.</li><li>A first install took 4.6 seconds of machine time, from an empty folder to a built field. No person has timed it by hand yet.</li></ul>
+</section>
+<section class="panel" id="why-it-exists" aria-labelledby="why-it-exists-heading">
+<div class="panel-head"><h2 id="why-it-exists-heading"><span class="chip">B</span> Why it exists<a class="anchor" href="#why-it-exists" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">problem</span></div>
+<p>Notes on an entry were plain text. A note often needs a link, an emphasis or a short list.</p>
+<p>The field is also a test. It is the smallest layer of a larger editor plan: one prose surface behind a <code>createEditor</code> call that a host can embed in minutes. The app is its first host. It is issue #3.</p>
+</section>
+<section class="panel wide" id="how-it-works" aria-labelledby="how-it-works-heading">
+<div class="panel-head"><h2 id="how-it-works-heading"><span class="chip">C</span> How it works<a class="anchor" href="#how-it-works" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">procedure</span></div>
+<p>Build the field once, then put it on a page.</p>
+<ol><li>Run <code>npm install</code>, then <code>npm run build:field</code>.</li><li>Copy <code>editor-field.js</code> and <code>editor-field.css</code> from <code>packages/editor-field/dist/</code> to your page's folder.</li><li>Add the stylesheet, an empty element, and the call:</li></ol>
+<pre><code class="language-html">&lt;link rel=&quot;stylesheet&quot; href=&quot;editor-field.css&quot; /&gt;
+&lt;div id=&quot;notes&quot;&gt;&lt;/div&gt;
+
+&lt;script type=&quot;module&quot;&gt;
+  import { createEditor } from &quot;./editor-field.js&quot;;
+
+  const editor = createEditor({
+    mount: document.getElementById(&quot;notes&quot;),
+    document: &quot;Some **notes** to start with.&quot;,
+  });
+  editor.on(&quot;change&quot;, (document) =&gt; console.log(document));
+&lt;/script&gt;</code></pre>
+<p><code>npm run example:field</code> serves a page that does this. Open <code>http://localhost:4174/example/</code>.</p>
+<p>A project with a bundler imports the source instead: <code>import { createEditor } from &quot;tastebuds-editor-field&quot;</code>, and the stylesheet from <code>tastebuds-editor-field/style.css</code>.</p>
+<h3 id="the-calls">The calls<a class="anchor" href="#the-calls" aria-hidden="true" tabindex="-1">#</a></h3>
+<div class="table-wrap"><table><thead><tr><th scope="col">Call</th><th scope="col">What it does</th></tr></thead><tbody><tr><td data-label="Call"><code>createEditor(options)</code></td><td data-label="What it does">Builds the field inside <code>options.mount</code> and returns the editor</td></tr><tr><td data-label="Call"><code>editor.on(&quot;change&quot;, handler)</code></td><td data-label="What it does">Calls <code>handler(document)</code> after each edit. Returns a function that stops it</td></tr><tr><td data-label="Call"><code>editor.getDocument()</code></td><td data-label="What it does">The document now</td></tr><tr><td data-label="Call"><code>editor.setDocument(document)</code></td><td data-label="What it does">Replaces the document. Does not fire &quot;change&quot;</td></tr><tr><td data-label="Call"><code>editor.execute(command, args)</code></td><td data-label="What it does">Runs <code>bold</code>, <code>italic</code>, <code>bulletList</code>, <code>link</code> (with <code>{ href }</code>), <code>unlink</code>, <code>undo</code>, <code>redo</code> or <code>focus</code>. Returns <code>false</code> when it cannot apply</td></tr><tr><td data-label="Call"><code>editor.destroy()</code></td><td data-label="What it does">Removes the field and all it added to the page</td></tr></tbody></table></div>
+<h3 id="the-options">The options<a class="anchor" href="#the-options" aria-hidden="true" tabindex="-1">#</a></h3>
+<div class="table-wrap stack"><table><thead><tr><th scope="col">Option</th><th scope="col">Default</th><th scope="col">What it sets</th></tr></thead><tbody><tr><td data-label="Option"><code>mount</code></td><td data-label="Default">required</td><td data-label="What it sets">The element to build the field in</td></tr><tr><td data-label="Option"><code>document</code></td><td data-label="Default"><code>&quot;&quot;</code></td><td data-label="What it sets">The starting text</td></tr><tr><td data-label="Option"><code>label</code></td><td data-label="Default"><code>&quot;Notes&quot;</code></td><td data-label="What it sets">The name a screen reader says</td></tr><tr><td data-label="Option"><code>placeholder</code></td><td data-label="Default">none</td><td data-label="What it sets">Grey text in an empty field</td></tr><tr><td data-label="Option"><code>toolbar</code></td><td class="status status-ok" data-label="Default"><code>true</code></td><td data-label="What it sets">The row of buttons: B, I, List, Link</td></tr><tr><td data-label="Option"><code>profile</code></td><td data-label="Default"><code>&quot;manuscript&quot;</code></td><td data-label="What it sets">The kind of surface. This field has one</td></tr></tbody></table></div>
+<h3 id="the-stored-format">The stored format<a class="anchor" href="#the-stored-format" aria-hidden="true" tabindex="-1">#</a></h3>
+<p>The document is text in a Markdown subset:</p>
+<div class="table-wrap"><table><thead><tr><th scope="col">You write</th><th scope="col">It means</th></tr></thead><tbody><tr><td data-label="You write">A blank line</td><td data-label="It means">A new paragraph</td></tr><tr><td data-label="You write">A line break</td><td data-label="It means">A line break, kept</td></tr><tr><td data-label="You write"><code>**bold**</code></td><td data-label="It means">Bold</td></tr><tr><td data-label="You write"><code>_italic_</code></td><td data-label="It means">Italic</td></tr><tr><td data-label="You write"><code>[text](https://example.com/)</code></td><td data-label="It means">A link. Only <code>http</code> and <code>https</code></td></tr><tr><td data-label="You write"><code>- item</code> at the start of a line</td><td data-label="It means">One item of a bullet list</td></tr></tbody></table></div>
+<p>Nothing else is Markdown here: a <code>#</code> is a <code>#</code>. To write <code>\</code>, <code>*</code>, <code>_</code>, <code>[</code> or <code>]</code> as itself, or a <code>-</code> at the start of a line, put a backslash before it. The field does this for you.</p>
+<pre><code class="language-text">A restaurant I watched for a year.
+
+- one long table
+- [the open fire](https://casalumbre.example/fire)</code></pre>
+<p><em>Illustrative example, not real data.</em></p>
+<h3 id="the-look">The look<a class="anchor" href="#the-look" aria-hidden="true" tabindex="-1">#</a></h3>
+<p>The field reads six CSS variables, each with a fallback: <code>--ef-ink</code>, <code>--ef-muted</code>, <code>--ef-line</code>, <code>--ef-surface</code>, <code>--ef-accent</code> and <code>--ef-font</code>. Set them on any element around the field. The app maps them to its own colours in <code>src/style.css</code>.</p>
+</section>
+<section class="panel" id="what-it-guarantees" aria-labelledby="what-it-guarantees-heading">
+<div class="panel-head"><h2 id="what-it-guarantees-heading"><span class="chip">D</span> What it guarantees<a class="anchor" href="#what-it-guarantees" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">checked promises</span></div>
+<p>Each promise is checked by a test in <code>test/editor-field.test.mjs</code>, or by a run in a browser where the row says so.</p>
+<ul><li>Every part of the format reads back as the same text. Marks that overlap keep their marks.</li><li>Plain notes from format 1.0 read as paragraphs and line breaks.</li><li>A link is <code>http</code> or <code>https</code>, or it is plain text. A <code>javascript:</code> address never becomes a link.</li><li>Text never becomes markup. The read-only view builds elements one by one and parses no HTML.</li><li>Importing the package needs no browser. Only <code>createEditor</code> does.</li><li><code>destroy()</code> leaves nothing of the field on the page (checked in a browser).</li><li>Enter in the link box applies the link. It does not send the form around the field (checked in a browser).</li></ul>
+</section>
+<section class="panel" id="what-it-does-not-do" aria-labelledby="what-it-does-not-do-heading">
+<div class="panel-head"><h2 id="what-it-does-not-do-heading"><span class="chip">E</span> What it does not do<a class="anchor" href="#what-it-does-not-do" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">limits</span></div>
+<ul><li>It has no headings, numbered lists, images, tables or code. The format has no words for them.</li><li>It keeps one line for each list item, and one level of list.</li><li>It does not save. The host saves what &quot;change&quot; hands it. The <code>storage</code> option of the larger plan is refused with a clear error.</li><li>It takes no extensions. A non-empty <code>extensions</code> list is refused.</li><li>It has one profile, <code>&quot;manuscript&quot;</code>. The plan's <code>&quot;code&quot;</code> profile is refused.</li><li>It is not on npm. It lives in this repository as <code>packages/editor-field</code>.</li><li>An <code>_</code> inside a word is italic here. Standard Markdown readers do not treat it so.</li></ul>
+<blockquote class="callout callout-limitation"><p><strong>Limitation:</strong> The one-file build is 585 kB, 162 kB compressed. Most of it is ProseMirror. The app's own bundle grew from 172 kB to 555 kB.</p></blockquote>
+<blockquote class="callout callout-limitation"><p><strong>Not verified:</strong> A person's first install against the 15-minute target. Screen readers. Phones and their on-screen keyboards. Firefox and Safari.</p></blockquote>
+</section>
+<section class="panel wide" id="when-something-goes-wrong" aria-labelledby="when-something-goes-wrong-heading">
+<div class="panel-head"><h2 id="when-something-goes-wrong-heading"><span class="chip">F</span> When something goes wrong<a class="anchor" href="#when-something-goes-wrong" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">recovery</span></div>
+<div class="table-wrap"><table><thead><tr><th scope="col">What you see</th><th scope="col">What to do</th></tr></thead><tbody><tr><td data-label="What you see"><code>createEditor needs a mount</code></td><td data-label="What to do">Pass the element to build in: <code>mount: document.getElementById(&quot;notes&quot;)</code></td></tr><tr><td data-label="What you see"><code>This field takes no extensions yet</code></td><td data-label="What to do">Remove the <code>extensions</code> option</td></tr><tr><td data-label="What you see"><code>This field has no storage adapter</code></td><td data-label="What to do">Remove <code>storage</code>. Save the document in your &quot;change&quot; handler</td></tr><tr><td data-label="What you see">The field has no border or buttons look bare</td><td data-label="What to do">The stylesheet is not loaded. Add <code>editor-field.css</code></td></tr><tr><td data-label="What you see">The page is blank and the console says &quot;Failed to resolve module&quot;</td><td data-label="What to do">Open the page from a web server, not from a file. <code>npm run example:field</code> is one</td></tr><tr><td data-label="What you see">&quot;Use a full address that starts with http:// or <a href="https://&quot;" rel="noopener">https://&quot;</a></td><td data-label="What to do">Type the whole address of the link</td></tr></tbody></table></div>
+</section>
+<section class="panel" id="key-decisions" aria-labelledby="key-decisions-heading">
+<div class="panel-head"><h2 id="key-decisions-heading"><span class="chip">G</span> Key decisions<a class="anchor" href="#key-decisions" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">design records</span></div>
+<ul><li><strong>The code lives in this repository, as a package.</strong> The field has one host. A repository of its own is worth it when a second host appears. The package boundary is already there: the app imports it by name.</li><li><strong>Notes are stored as a Markdown subset, not as ProseMirror JSON.</strong> A profile is a file that people read and edit by hand, and a string keeps every 1.0 file valid. The cost is a converter, which the tests cover.</li><li><strong>Italic is written <code>_like this_</code>, bold <code>**like this**</code>.</strong> Two different markers cannot be confused with each other when marks overlap.</li><li><strong>The converter is this project's own, about 250 lines.</strong> It does exactly the subset, has no dependencies, and runs without a browser.</li><li><strong>The contract follows the plan's example where the field can, and refuses where it cannot.</strong> <code>mount</code>, <code>profile</code>, <code>document</code>, <code>on(&quot;change&quot;)</code>, <code>execute</code> and <code>destroy</code> match. <code>extensions</code> and <code>storage</code> raise an error; they do not pretend to work.</li></ul>
+</section>
+<section class="panel wide" id="verification" aria-labelledby="verification-heading">
+<div class="panel-head"><h2 id="verification-heading"><span class="chip">H</span> Verification<a class="anchor" href="#verification" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">evidence</span></div>
+<div class="table-wrap"><table><thead><tr><th scope="col">Check</th><th scope="col">Outcome</th></tr></thead><tbody><tr><td data-label="Check">12 tests of the format and the import, <code>npm test</code></td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">Type, bold with Ctrl+B, save, and read the note back on its card, in the app</td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">Link and list buttons, a refused bad address, Escape in the link box, in the app</td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">A fresh clone builds the field and the example page takes typing</td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">A person's first install, timed</td><td class="status status-na" data-label="Outcome">not checked</td></tr><tr><td data-label="Check">Screen reader, phone, Firefox, Safari</td><td class="status status-na" data-label="Outcome">not checked</td></tr></tbody></table></div>
+<p>First install, measured 2026-11-14 on Windows 11 with Node 24 and an empty npm cache: clone 0.3 s, <code>npm install</code> 2.9 s, <code>npm run build:field</code> 1.4 s. The page then needs the 12 lines above.</p>
+</section>
+<section class="panel wide" id="technical-appendix" aria-labelledby="technical-appendix-heading">
+<div class="panel-head"><h2 id="technical-appendix-heading"><span class="chip">I</span> Technical appendix<a class="anchor" href="#technical-appendix" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">reference</span></div>
+<div class="table-wrap"><table><thead><tr><th scope="col">File</th><th scope="col">What it is</th></tr></thead><tbody><tr><td data-label="File"><code>packages/editor-field/src/index.ts</code></td><td data-label="What it is"><code>createEditor</code>, the toolbar and the commands</td></tr><tr><td data-label="File"><code>packages/editor-field/src/markdown.ts</code></td><td data-label="What it is">The format: <code>fromMarkdown</code>, <code>toMarkdown</code>, <code>toPlainText</code></td></tr><tr><td data-label="File"><code>packages/editor-field/src/render.ts</code></td><td data-label="What it is"><code>renderMarkdown</code>: a read-only view of a document</td></tr><tr><td data-label="File"><code>packages/editor-field/src/style.css</code></td><td data-label="What it is">The look and its variables</td></tr><tr><td data-label="File"><code>packages/editor-field/example/index.html</code></td><td data-label="What it is">The first-install page</td></tr><tr><td data-label="File"><code>packages/editor-field/vite.config.ts</code></td><td data-label="What it is">The one-file build</td></tr></tbody></table></div>
+<p>Tiptap packages, all MIT, version 3.34: <code>core</code>, <code>pm</code>, <code>extension-document</code>, <code>extension-paragraph</code>, <code>extension-text</code>, <code>extension-hard-break</code>, <code>extension-bold</code>, <code>extension-italic</code>, <code>extension-link</code>, <code>extension-list</code> and <code>extensions</code> (undo and placeholder). A list item is limited to one paragraph, to match the stored format.</p>
+<p>The profile format is now 1.1: the <code>notes</code> field holds this Markdown subset. A 1.0 file is a valid 1.1 file.</p>
+</section>
+    <footer class="title-block" aria-label="Title block">
+      <div class="tb-cell tb-title"><span class="tb-label">Title</span><span class="tb-value">Editor field</span></div>
+      <div class="tb-cell tb-mono"><span class="tb-label">Source</span><span class="tb-value">docs/features/editor-field.md</span></div>
+      <div class="tb-cell"><span class="tb-label">Owner</span><span class="tb-value">—</span></div>
+      <div class="tb-cell"><span class="tb-label">Status</span><span class="tb-value">In review as of 2026-11-14</span></div>
+      <div class="tb-cell tb-mono"><span class="tb-label">Rev</span><span class="tb-value">3b149de0</span></div>
+      <div class="tb-cell tb-mono"><span class="tb-label">Rendered</span><span class="tb-value">2026-11-14</span></div>
+      <div class="tb-cell tb-mono"><span class="tb-label">Sheet</span><span class="tb-value">1 of 1</span></div>
+      <div class="tb-cell tb-mono"><span class="tb-label">Note</span><span class="tb-value">Markdown is the source of record</span></div>
+    </footer>
+    <p class="doc-footer">Rendered from <code>editor-field.md</code> on 2026-11-14. The Markdown file is the source of record.</p>
+  </main>
+  <div class="ruler ruler-right" aria-hidden="true"><span>A</span><span>B</span><span>C</span><span>D</span></div>
+  <div class="corner corner-bl" aria-hidden="true"></div>
+  <div class="ruler ruler-bottom" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+  <div class="corner corner-br" aria-hidden="true"></div>
+</div>
+<script>
+(function () {
+  var root = document.documentElement, key = "feature-doc-theme";
+  var toggle = document.querySelector('[data-action="toggle"]'), system = document.querySelector('[data-action="system"]');
+  var media = window.matchMedia("(prefers-color-scheme: dark)");
+  function effective() { return root.dataset.theme || (media.matches ? "dark" : "light"); }
+  function sync() {
+    // The visible text is the accessible name: it names the theme a click switches to.
+    toggle.textContent = effective() === "dark" ? "Light theme" : "Dark theme";
+    system.hidden = !root.dataset.theme;
+  }
+  toggle.addEventListener("click", function () {
+    var next = effective() === "dark" ? "light" : "dark";
+    root.dataset.theme = next;
+    try { localStorage.setItem(key, next); } catch (e) {}
+    sync();
+  });
+  system.addEventListener("click", function () {
+    delete root.dataset.theme;
+    try { localStorage.removeItem(key); } catch (e) {}
+    sync();
+    toggle.focus();
+  });
+  if (media.addEventListener) media.addEventListener("change", sync);
+  sync();
+  // Only tables that actually scroll become a focusable, named region.
+  function regions() {
+    document.querySelectorAll(".table-wrap").forEach(function (wrap) {
+      var scrolls = wrap.scrollWidth > wrap.clientWidth + 1;
+      if (scrolls) {
+        wrap.setAttribute("tabindex", "0");
+        wrap.setAttribute("role", "region");
+        var head = wrap.querySelector("thead");
+        wrap.setAttribute("aria-label", head ? "Table: " + head.textContent.trim().replace(/\s+/g, ", ").slice(0, 80) : "Table");
+      } else {
+        wrap.removeAttribute("tabindex");
+        wrap.removeAttribute("role");
+        wrap.removeAttribute("aria-label");
+      }
+    });
+  }
+  regions();
+  window.addEventListener("resize", regions);
+})();
+</script>
+</body>
+</html>

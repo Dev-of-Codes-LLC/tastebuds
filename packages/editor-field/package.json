@@ -1,0 +1,26 @@
+{
+  "name": "tastebuds-editor-field",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A small prose field: paragraphs, bold, italic, links and bullet lists, stored as a Markdown subset.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./markdown": "./src/markdown.ts",
+    "./style.css": "./src/style.css"
+  },
+  "dependencies": {
+    "@tiptap/core": "^3.34.0",
+    "@tiptap/extension-bold": "^3.34.0",
+    "@tiptap/extension-document": "^3.34.0",
+    "@tiptap/extension-hard-break": "^3.34.0",
+    "@tiptap/extension-italic": "^3.34.0",
+    "@tiptap/extension-link": "^3.34.0",
+    "@tiptap/extension-list": "^3.34.0",
+    "@tiptap/extension-paragraph": "^3.34.0",
+    "@tiptap/extension-text": "^3.34.0",
+    "@tiptap/extensions": "^3.34.0",
+    "@tiptap/pm": "^3.34.0"
+  }
+}

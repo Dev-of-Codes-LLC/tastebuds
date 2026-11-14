@@ -308,7 +308,19 @@ main {
 .card .notes {
   margin: 10px 0 0;
   font-size: 15px;
-  white-space: pre-wrap;
+}
+.card .notes p,
+.card .notes ul {
+  margin: 0 0 0.5em;
+}
+.card .notes ul {
+  padding-left: 1.2em;
+}
+.card .notes > :last-child {
+  margin-bottom: 0;
+}
+.card .notes a {
+  text-decoration-color: var(--accent);
 }
 .card .meta {
   display: flex;
@@ -425,6 +437,24 @@ textarea {
 fieldset {
   border: 0;
   padding: 0;
+}
+.group {
+  margin: 0 0 12px;
+}
+.group-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+/* The editor field takes its colours from the page's own tokens. */
+.notes-field {
+  --ef-ink: var(--ink);
+  --ef-muted: var(--muted);
+  --ef-line: var(--line);
+  --ef-surface: var(--paper);
+  --ef-accent: var(--accent);
+  --ef-font: var(--sans);
 }
 fieldset .choices {
   display: flex;

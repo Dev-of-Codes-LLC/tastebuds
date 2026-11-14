@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Editor field: first install</title>
+    <link rel="stylesheet" href="../dist/editor-field.css" />
+    <style>
+      body { max-width: 640px; margin: 40px auto; padding: 0 16px; font: 16px/1.5 system-ui, sans-serif; }
+      pre { background: #f3f1ec; padding: 12px; border-radius: 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    </style>
+  </head>
+  <body>
+    <h1>Notes</h1>
+    <div id="notes"></div>
+    <h2>What "change" hands the page</h2>
+    <pre id="out"></pre>
+
+    <script type="module">
+      import { createEditor } from "../dist/editor-field.js";
+
+      const out = document.getElementById("out");
+      const editor = createEditor({
+        mount: document.getElementById("notes"),
+        document: "Some **notes** to start with.",
+        label: "Notes",
+      });
+      out.textContent = editor.getDocument();
+      editor.on("change", (document) => (out.textContent = document));
+    </script>
+  </body>
+</html>

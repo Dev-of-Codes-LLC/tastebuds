@@ -1,6 +1,6 @@
 {
   "$schema": "../schema/profile.schema.json",
-  "formatVersion": "1.0",
+  "formatVersion": "1.1",
   "owner": {
     "type": "Person",
     "name": "Rosa Marin",
@@ -23,7 +23,7 @@
         "plating",
         "restraint"
       ],
-      "notes": "Plates that look simple and never are.",
+      "notes": "Plates that look _simple_ and never are.",
       "added": "2026-03-02"
     },
     {
@@ -52,7 +52,7 @@
         "sharing",
         "fire"
       ],
-      "notes": "A restaurant I watched for a year. Moved here when the supper club began.",
+      "notes": "A restaurant I watched for a year. Moved here when the supper club began.\n\n- one long table\n- no menus\n- [the open fire](https://casalumbre.example/fire)",
       "added": "2025-11-18",
       "gave": "Serving every dish in the middle of the table, to share.",
       "creditedIn": [

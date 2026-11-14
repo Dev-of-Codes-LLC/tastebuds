@@ -6,7 +6,7 @@
 <title>Profile app</title>
 <meta name="description" content="A page in your browser opens a profile file, edits it, shows it, and saves it back to your disk.">
 <meta name="color-scheme" content="light dark">
-<meta name="source-sha256" content="cfc85fcf1bb28e33d8bedd2e4ef197375a17a86a11647062733c3fa4d7ef0a40">
+<meta name="source-sha256" content="751b4ca9995c3abc19d71ee53d94ddf97c19fa08be8adc25b6cf4f9dff975e62">
 <meta name="link-base" content="">
 <script>
   // Apply a saved theme before first paint so the page never flashes.
@@ -229,7 +229,7 @@ figure.diagram svg { display: block; width: 100%; max-width: 56rem; height: auto
 <p>Start the app, then open a file or start a new one. The video shows the whole path in 72 seconds: it adds an entry to the example, then moves it to inspirations. Its words are in profile-app.srt.</p>
 <ol><li>Run <code>npm install</code>, then <code>npm run dev</code>. Open the address that the command prints.</li><li>Select <strong>New profile</strong>, <strong>Open a file</strong> or <strong>See the example</strong>.</li><li>Select <strong>Add</strong> above a list to add an entry to that list.</li><li>Select <strong>Save</strong>. The top bar shows &quot;not saved&quot; until you do.</li></ol>
 <h3 id="add-an-entry">Add an entry<a class="anchor" href="#add-an-entry" aria-hidden="true" tabindex="-1">#</a></h3>
-<p>The form asks for a name, a kind, a date, the relation, and one or more links. Tags and notes are optional. The app makes the entry's <code>id</code> from its name, and never changes it.</p>
+<p>The form asks for a name, a kind, a date, the relation, and one or more links. Tags and notes are optional. Notes are written in the <a href="editor-field.html">editor field</a>, with bold, italic, links and bullet lists. The app makes the entry's <code>id</code> from its name, and never changes it.</p>
 <p>If you select <strong>Inspiration</strong>, the form also asks for two things:</p>
 <div class="table-wrap"><table><thead><tr><th scope="col">Field</th><th scope="col">What to write</th></tr></thead><tbody><tr><td data-label="Field">What it gave</td><td data-label="What to write">One sentence: what your work took from it</td></tr><tr><td data-label="Field">Credited in</td><td data-label="What to write">The work of yours that credits it. One work on each line: a name, then <code>\|</code> and a link if there is one</td></tr></tbody></table></div>
 <h3 id="move-a-taste-reference-to-inspirations">Move a taste reference to inspirations<a class="anchor" href="#move-a-taste-reference-to-inspirations" aria-hidden="true" tabindex="-1">#</a></h3>
@@ -268,7 +268,7 @@ figure.diagram svg { display: block; width: 100%; max-width: 56rem; height: auto
 </section>
 <section class="panel" id="what-it-does-not-do" aria-labelledby="what-it-does-not-do-heading">
 <div class="panel-head"><h2 id="what-it-does-not-do-heading"><span class="chip">F</span> What it does not do<a class="anchor" href="#what-it-does-not-do" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">limits</span></div>
-<ul><li>It does not save in place in every browser. Chrome and Edge write back to the file you opened. Firefox and Safari download a new copy on each save.</li><li>It does not open a file that is not valid. It lists the problems, and you fix the file by hand.</li><li>It does not keep a draft. If you close the tab before you save, the changes are gone. The browser asks first.</li><li>It does not edit the <code>id</code> of an entry, or reorder entries.</li><li>It does not format notes. Notes are plain text until the editor field of issue #3 exists.</li><li>It is not hosted anywhere. You run it from a checkout.</li></ul>
+<ul><li>It does not save in place in every browser. Chrome and Edge write back to the file you opened. Firefox and Safari download a new copy on each save.</li><li>It does not open a file that is not valid. It lists the problems, and you fix the file by hand.</li><li>It does not keep a draft. If you close the tab before you save, the changes are gone. The browser asks first.</li><li>It does not edit the <code>id</code> of an entry, or reorder entries.</li><li>It is not hosted anywhere. You run it from a checkout.</li></ul>
 <blockquote class="callout callout-limitation"><p><strong>Not verified:</strong> Open and save through the browser's file picker, and the Firefox and Safari download path. The checks in the browser used the built-in example.</p></blockquote>
 </section>
 <section class="panel wide" id="when-something-goes-wrong" aria-labelledby="when-something-goes-wrong-heading">
@@ -293,7 +293,7 @@ figure.diagram svg { display: block; width: 100%; max-width: 56rem; height: auto
       <div class="tb-cell tb-mono"><span class="tb-label">Source</span><span class="tb-value">docs/features/profile-app.md</span></div>
       <div class="tb-cell"><span class="tb-label">Owner</span><span class="tb-value">—</span></div>
       <div class="tb-cell"><span class="tb-label">Status</span><span class="tb-value">Merged 2026-11-13. The video is in review as of 2026-11-13</span></div>
-      <div class="tb-cell tb-mono"><span class="tb-label">Rev</span><span class="tb-value">cfc85fcf</span></div>
+      <div class="tb-cell tb-mono"><span class="tb-label">Rev</span><span class="tb-value">751b4ca9</span></div>
       <div class="tb-cell tb-mono"><span class="tb-label">Rendered</span><span class="tb-value">2026-11-14</span></div>
       <div class="tb-cell tb-mono"><span class="tb-label">Sheet</span><span class="tb-value">1 of 1</span></div>
       <div class="tb-cell tb-mono"><span class="tb-label">Note</span><span class="tb-value">Markdown is the source of record</span></div>

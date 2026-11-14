@@ -26,6 +26,10 @@ npm run dev
 
 Then open the address that the command prints. [Guide to the app](docs/features/profile-app.md).
 
+## The editor field
+
+The notes on an entry are written in a small editor field that any web page can embed: `createEditor({ mount, document })`. [Guide to the field](docs/features/editor-field.md).
+
 ## The format
 
 A profile is one JSON file.

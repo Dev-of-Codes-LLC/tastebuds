@@ -5,7 +5,7 @@ One JSON file holds a whole taste profile: who it belongs to, whose taste they w
 | | |
 |---|---|
 | Status | In review as of 2026-11-13 |
-| Area | File format, version 1.0 |
+| Area | File format, version 1.1 |
 | Delivered in | Issue #1, "Define the taste profile format" |
 | Related | [Profile app](profile-app.md), [the schema](../../schema/profile.schema.json), [the example profile](../../examples/profile.json) |
 
@@ -43,7 +43,7 @@ Write the profile as a JSON file, then check it.
 | `sameAs` | yes | One or more links to the entity's own site and profiles. The first link is the main one |
 | `added` | yes | The day you added the entry, as `YYYY-MM-DD` |
 | `tags` | no | Taste tags: short lower-case words for what you see in the entity |
-| `notes` | no | Your own notes, as plain text |
+| `notes` | no | Your own notes, in a small Markdown subset: bold, italic, links and bullet lists. See [Editor field](editor-field.md). Plain text is valid |
 | `gave` | inspirations only | What the entity gave to your work, in a sentence |
 | `creditedIn` | inspirations only | One or more pieces of your work that credit it, each with a `name` and an optional `url` |
 
@@ -102,7 +102,6 @@ Each promise is checked by a test in `test/format.test.mjs`.
 - It does not export JSON-LD. The format only fixes the mapping that the export needs. The export comes with the app.
 - It does not record when an entry became an inspiration, or its history. Version control of the file holds that.
 - It does not check that a link works or points at the right entity.
-- It does not hold rich text. `notes` is plain text until the editor field exists.
 - It does not use the more exact schema.org types, such as `Book`. Three types keep version 1 small.
 
 > **Limitation:** JSON Schema cannot require unique entry ids. Only the validate script checks them. A site that uses the schema alone must check ids itself.

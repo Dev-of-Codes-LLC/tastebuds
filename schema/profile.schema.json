@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:tastebuds:schema:profile:1",
-  "title": "Tastebuds profile, format 1.0",
+  "title": "Tastebuds profile, format 1.1",
   "description": "One taste profile: an owner, and the entries the owner watches (taste references) or credits (inspirations).",
   "type": "object",
   "required": ["formatVersion", "owner", "entries"],
@@ -105,7 +105,7 @@
           "uniqueItems": true
         },
         "notes": {
-          "description": "The owner's own notes on the entry, as plain text.",
+          "description": "The owner's own notes on the entry, in a small Markdown subset: paragraphs, a kept line break, **bold**, _italic_, [links](https://example.com/) and '- ' bullet lists. Nothing else is Markdown. Plain text from format 1.0 reads the same. See docs/features/editor-field.md.",
           "type": "string"
         },
         "added": {
