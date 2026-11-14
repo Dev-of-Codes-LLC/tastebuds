@@ -38,7 +38,7 @@ export interface Profile {
 export const KINDS: Kind[] = ["person", "studio", "channel", "book", "work"];
 
 export function newProfile(owner: Owner): Profile {
-  return { formatVersion: "1.0", owner, entries: [] };
+  return { formatVersion: "1.1", owner, entries: [] };
 }
 
 // "Lantern & Loom" -> "lantern-loom"

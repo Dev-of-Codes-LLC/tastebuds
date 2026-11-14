@@ -1,0 +1,115 @@
+/*
+  The look of the field. A host sets these variables on .ef, or on any
+  element around it, to match its own page. Each has a fallback, so the
+  field is readable on a page that sets none.
+
+    --ef-ink      text
+    --ef-muted    placeholder and quiet buttons
+    --ef-line     borders
+    --ef-surface  the background of the text area
+    --ef-accent   focus ring, links and pressed buttons
+    --ef-font     the typeface of the text
+*/
+
+.ef {
+  display: block;
+  color: var(--ef-ink, #1f1b16);
+  font: 16px/1.5 var(--ef-font, system-ui, sans-serif);
+  border: 1px solid var(--ef-line, #c9c2b4);
+  border-radius: 6px;
+  background: var(--ef-surface, #fff);
+  overflow: hidden;
+}
+.ef:focus-within {
+  outline: 2px solid var(--ef-accent, #a3401e);
+  outline-offset: 2px;
+}
+
+.ef-toolbar,
+.ef-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-bottom: 1px solid var(--ef-line, #c9c2b4);
+}
+.ef-link[hidden] {
+  display: none;
+}
+.ef-link input {
+  flex: 1 1 160px;
+  min-width: 0;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--ef-line, #c9c2b4);
+  border-radius: 4px;
+  padding: 3px 7px;
+}
+
+.ef-button {
+  min-width: 32px;
+  min-height: 30px;
+  padding: 2px 8px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ef-muted, #6b6257);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.ef-bold {
+  font-weight: 700;
+}
+.ef-italic {
+  font-style: italic;
+}
+.ef-button[aria-pressed="true"] {
+  color: var(--ef-accent, #a3401e);
+  border-color: currentColor;
+}
+.ef-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+@media (hover: hover) {
+  .ef-button:not(:disabled):hover {
+    color: var(--ef-ink, #1f1b16);
+    border-color: var(--ef-line, #c9c2b4);
+  }
+}
+
+.ef-content {
+  min-height: 84px;
+  max-height: 40vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 10px;
+  outline: none;
+  overflow-wrap: anywhere;
+}
+.ef-content p {
+  margin: 0 0 0.6em;
+}
+.ef-content > :last-child {
+  margin-bottom: 0;
+}
+.ef-content ul {
+  margin: 0 0 0.6em;
+  padding-left: 1.3em;
+}
+.ef-content li p {
+  margin: 0;
+}
+.ef-content a {
+  color: var(--ef-accent, #a3401e);
+}
+.ef-content p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--ef-muted, #6b6257);
+  pointer-events: none;
+}

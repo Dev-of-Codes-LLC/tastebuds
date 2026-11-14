@@ -1,6 +1,7 @@
 // The app: open a profile file, edit its entries, show the profile with the
 // two relations apart, save the file, and export JSON-LD.
 
+import { createEditor, renderMarkdown } from "tastebuds-editor-field";
 import exampleProfile from "../examples/profile.json" with { type: "json" };
 import { explainAll } from "./explain.ts";
 import { download, openFile, saveFile } from "./file.ts";
@@ -170,8 +171,20 @@ function openExample(): void {
 
 // --- Dialogs -------------------------------------------------------------
 
-function dialog(title: string, lead: string, body: Child[], onSubmit: () => string[]): void {
+function dialog(
+  title: string,
+  lead: string,
+  body: Child[],
+  onSubmit: () => string[],
+  onShut: () => void = () => {},
+): void {
   const problems = h("ul", { class: "problems", role: "alert" });
+  // Every way out of the dialog goes through here, once.
+  const shut = () => {
+    if (!el.isConnected) return;
+    onShut();
+    el.remove();
+  };
   const el = h(
     "dialog",
     {},
@@ -184,7 +197,7 @@ function dialog(title: string, lead: string, body: Child[], onSubmit: () => stri
           event.preventDefault();
           const found = onSubmit();
           problems.replaceChildren(...found.map((p) => h("li", {}, p)));
-          if (found.length === 0) el.remove();
+          if (found.length === 0) shut();
         },
       },
       h("h2", {}, title),
@@ -194,12 +207,12 @@ function dialog(title: string, lead: string, body: Child[], onSubmit: () => stri
       h(
         "div",
         { class: "buttons" },
-        h("button", { type: "button", onclick: () => el.remove() }, "Cancel"),
+        h("button", { type: "button", onclick: shut }, "Cancel"),
         h("button", { type: "submit", class: "primary" }, "Save"),
       ),
     ),
   );
-  el.addEventListener("close", () => el.remove());
+  el.addEventListener("close", shut);
   document.body.append(el);
   el.showModal();
 }
@@ -303,7 +316,14 @@ function entryDialog(current: Entry | null, relation: Relation): void {
     placeholder: "https://",
   });
   const tags = h("input", { type: "text", name: "tags", value: (start.tags ?? []).join(", ") });
-  const notes = h("textarea", { name: "notes", rows: 3, value: start.notes ?? "" });
+  // The notes are written in the editor field, not in a plain text area.
+  const notesMount = h("div", { class: "notes-field" });
+  const notes = createEditor({
+    mount: notesMount,
+    document: start.notes ?? "",
+    label: "Notes",
+    placeholder: "What you see in it, in your own words.",
+  });
   const { block, gave, credits } = inspirationFields(start);
 
   const radio = (value: Relation, label: string) =>
@@ -346,7 +366,7 @@ function entryDialog(current: Entry | null, relation: Relation): void {
         links,
       ),
       field("Tags", "What you see in it. Separate tags with commas.", tags),
-      field("Notes", "", notes),
+      h("div", { class: "group" }, h("span", { class: "group-label" }, "Notes"), notesMount),
     ],
     () => {
       const chosen = (document.querySelector('input[name="relation"]:checked') as HTMLInputElement)
@@ -358,7 +378,7 @@ function entryDialog(current: Entry | null, relation: Relation): void {
         relation: chosen,
         sameAs: parseLinks(links.value),
         tags: parseTags(tags.value),
-        notes: notes.value,
+        notes: notes.getDocument(),
         added: added.value,
         gave: gave.value,
         creditedIn: parseCredits(credits.value),
@@ -369,6 +389,7 @@ function entryDialog(current: Entry | null, relation: Relation): void {
       change(next);
       return [];
     },
+    () => notes.destroy(),
   );
   name.focus();
 }
@@ -432,7 +453,7 @@ function card(entry: Entry): HTMLElement {
           ]),
         ),
       ),
-    entry.notes && h("p", { class: "notes" }, entry.notes),
+    entry.notes && h("div", { class: "notes" }, renderMarkdown(entry.notes)),
     h(
       "div",
       { class: "meta" },
