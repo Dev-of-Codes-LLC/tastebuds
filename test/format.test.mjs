@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { validate, schema, kinds } from "../scripts/validate.mjs";
+import { validate, schema, kinds } from "../src/validate.ts";
 
 const example = () =>
   JSON.parse(readFileSync(new URL("../examples/profile.json", import.meta.url), "utf8"));
