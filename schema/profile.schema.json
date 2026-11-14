@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tastebuds:schema:profile:1",
+  "title": "Tastebuds profile, format 1.0",
+  "description": "One taste profile: an owner, and the entries the owner watches (taste references) or credits (inspirations).",
+  "type": "object",
+  "required": ["formatVersion", "owner", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "description": "Optional pointer to this schema, for editors.",
+      "type": "string"
+    },
+    "formatVersion": {
+      "description": "The version of the format the file is written in. A 1.x file is valid against any later 1.x schema.",
+      "type": "string",
+      "pattern": "^1\\.[0-9]+$"
+    },
+    "owner": { "$ref": "#/$defs/owner" },
+    "entries": {
+      "description": "The entries of the profile. Entry ids must be unique; the validate script checks this, because JSON Schema cannot.",
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "link": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://"
+    },
+    "links": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/link" },
+      "uniqueItems": true
+    },
+    "owner": {
+      "description": "Who the profile belongs to. Maps to a schema.org Person or Organization.",
+      "type": "object",
+      "required": ["type", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "description": "The schema.org type of the owner.",
+          "enum": ["Person", "Organization"]
+        },
+        "name": { "$ref": "#/$defs/text" },
+        "sameAs": {
+          "description": "The owner's own site and profiles. The first link is the main one.",
+          "$ref": "#/$defs/links"
+        }
+      }
+    },
+    "credit": {
+      "description": "A piece of the owner's work that credits an inspiration.",
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "$ref": "#/$defs/text" },
+        "url": { "$ref": "#/$defs/link" }
+      }
+    },
+    "entry": {
+      "description": "One entity in the profile, in one of two relations to the owner.",
+      "type": "object",
+      "required": ["id", "name", "kind", "relation", "sameAs", "added"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "A short stable name for the entry, unique in the profile. It stays the same when the entry is renamed or moves from taste reference to inspiration.",
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "maxLength": 64
+        },
+        "name": { "$ref": "#/$defs/text" },
+        "kind": {
+          "description": "What the entity is. Each kind maps to one schema.org type; see schema/kinds.json. person: Person. studio: Organization. channel, book, work: CreativeWork.",
+          "enum": ["person", "studio", "channel", "book", "work"]
+        },
+        "relation": {
+          "description": "tasteReference: the owner watches this entity's taste and has taken nothing from it yet. inspiration: it gave something to the owner's work, and that work credits it.",
+          "enum": ["tasteReference", "inspiration"]
+        },
+        "sameAs": {
+          "description": "The entity's own site and profiles: site, YouTube, X, GitHub, and its Wikidata item when one exists. At least one, so the entity can be recognised elsewhere. The first link is the main one.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/link" },
+          "uniqueItems": true,
+          "minItems": 1
+        },
+        "tags": {
+          "description": "Taste tags: short lower-case words for what the owner sees in this entity.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+            "maxLength": 40
+          },
+          "uniqueItems": true
+        },
+        "notes": {
+          "description": "The owner's own notes on the entry, as plain text.",
+          "type": "string"
+        },
+        "added": {
+          "description": "The day the entry was added to the profile, as YYYY-MM-DD.",
+          "type": "string",
+          "format": "date"
+        },
+        "gave": {
+          "description": "Inspirations only: what the entity gave to the owner's work, in a sentence.",
+          "$ref": "#/$defs/text"
+        },
+        "creditedIn": {
+          "description": "Inspirations only: the work that credits the entity. At least one.",
+          "type": "array",
+          "items": { "$ref": "#/$defs/credit" },
+          "minItems": 1
+        }
+      },
+      "if": {
+        "required": ["relation"],
+        "properties": { "relation": { "const": "inspiration" } }
+      },
+      "then": {
+        "required": ["gave", "creditedIn"]
+      },
+      "else": {
+        "properties": {
+          "gave": false,
+          "creditedIn": false
+        }
+      }
+    }
+  }
+}

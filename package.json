@@ -1,0 +1,16 @@
+{
+  "name": "tastebuds",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Keep a taste profile: the people and work whose taste you watch, and the ones that shaped your own work.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate.mjs",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}

@@ -2,7 +2,7 @@
 
 Keep a taste profile: the people and work whose taste you watch, and the ones that shaped your own work, with credit.
 
-Status: planning. There is no code yet. The open issues describe version 1.
+Status: the file format is defined. The app is not built yet. The open issues describe the rest of version 1.
 
 ## The idea
 
@@ -14,6 +14,21 @@ A profile holds entries of two kinds:
 An entry moves from taste reference to inspiration when it shapes a piece of work, and that work then credits it.
 
 Each entry is a schema.org `Person`, `Organization` or `CreativeWork` with `sameAs` links to the entity's own site and profiles, so the same entity is recognisable wherever it appears.
+
+## The format
+
+A profile is one JSON file.
+
+- [Guide to the format](docs/features/profile-format.md)
+- [The schema](schema/profile.schema.json), JSON Schema draft 2020-12
+- [An example profile](examples/profile.json), with made-up entities
+
+Check a profile:
+
+```bash
+npm install
+npm run validate -- examples/profile.json
+```
 
 ## Version 1
 
