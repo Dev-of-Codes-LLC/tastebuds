@@ -561,7 +561,7 @@ function bar(): HTMLElement {
       h(
         "span",
         { class: "file" },
-        state.fileName,
+        h("span", { class: "name", title: state.fileName }, state.fileName),
         state.dirty && h("span", { class: "dirty" }, " · not saved"),
       ),
     has && h("button", { type: "button", onclick: startNew }, "New"),

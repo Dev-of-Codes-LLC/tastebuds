@@ -82,6 +82,27 @@ Select **Remove**. A message at the bottom of the page offers **Undo** for 8 sec
 
 *Illustrative example, not real data.*
 
+## Defensive styles
+
+The styles follow the tips at [Defensive CSS](https://defensivecss.dev). They assume content the design did not plan for: a name of 200 letters, a link with no break, 30 tags, a window 320px wide. Each place in `src/style.css` has a comment that starts with "Defensive:" and names the tip.
+
+| Tip | Where it applies |
+|---|---|
+| Long content | Every name, link and note breaks to fit. The file name in the top bar cuts with an ellipsis |
+| Flexbox wrapping | The top bar, list headings, card actions, tags and dialog buttons |
+| Minimum content size in flexbox and grid | The file name, the two lists, and the label column of a card |
+| CSS grid fixed values, auto-fit | A card's labels sit above their text on a narrow card. Form fields stack when there is no room for two |
+| Scrollbars on demand, scroll chaining, scrollbar gutter | A dialog scrolls only when it must, and the page behind it stays still |
+| Vertical media queries | The start screen moves down the page only in a tall window |
+| Accidental hover on mobile | Hover styles apply only with a pointer that can hover |
+| Input zoom on iOS Safari | Form fields use 16px text |
+| Button minimum width | Short buttons such as **Add** keep a 64px width |
+| Default flexbox stretching | A tag keeps its height next to a link that wraps |
+| Fixed sizes | Text areas have a minimum and a maximum height, not a fixed one |
+| Image maximum width, image distortion | A base rule, ready for the first image |
+
+These tips have nothing to apply to yet: background repeat, text over image, image inner border, position sticky with CSS grid, grouping vendor selectors, using space-between, and CSS variable fallback. The app has no background images, sticky parts or vendor selectors, and it sets every variable in one place.
+
 ## What it guarantees
 
 Each promise is checked by a test in `test/app.test.mjs`.
@@ -127,6 +148,7 @@ Each promise is checked by a test in `test/app.test.mjs`.
 | Type check and production build, `npm run build` | pass |
 | Add, move to inspirations, move back, remove and undo, in the browser | pass |
 | Light and dark theme, desktop and phone width | pass |
+| No sideways scroll at 320px with a 160-letter name, a 220-letter link and 30 tags | pass |
 | Open and save with a real file | not checked |
 
 ## Technical appendix

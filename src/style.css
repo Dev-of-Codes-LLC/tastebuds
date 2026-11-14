@@ -1,3 +1,10 @@
+/*
+  The styles follow the Defensive CSS tips (https://defensivecss.dev): they
+  assume names, links and notes of any length, short and narrow windows,
+  touch screens, and content that is missing. A comment that starts with
+  "Defensive:" marks each place and names the tip.
+*/
+
 :root {
   --paper: #f7f3ea;
   --card: #fffdf8;
@@ -31,11 +38,24 @@
   box-sizing: border-box;
 }
 
+/* Defensive: image maximum width, image distortion. The app has no images
+   yet; any that arrive cannot overflow or stretch. */
+img,
+svg,
+video {
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
 body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
   font: 16px/1.5 var(--sans);
+  /* Defensive: long content. A link or a word with no spaces breaks
+     instead of pushing the page wide. */
+  overflow-wrap: anywhere;
 }
 
 a {
@@ -43,8 +63,12 @@ a {
   text-decoration-color: var(--line);
   text-underline-offset: 3px;
 }
-a:hover {
-  text-decoration-color: var(--accent);
+/* Defensive: accidental hover on mobile. Hover styles apply only where
+   there is a pointer that can hover. */
+@media (hover: hover) {
+  a:hover {
+    text-decoration-color: var(--accent);
+  }
 }
 
 button {
@@ -55,9 +79,14 @@ button {
   border-radius: 6px;
   padding: 6px 12px;
   cursor: pointer;
+  /* Defensive: button minimum width. "Add" and "New" stay easy to hit. */
+  min-width: 64px;
+  min-height: 36px;
 }
-button:hover {
-  border-color: var(--ink);
+@media (hover: hover) {
+  button:hover {
+    border-color: var(--ink);
+  }
 }
 button.primary {
   background: var(--accent);
@@ -69,10 +98,14 @@ button.quiet {
   padding: 2px 6px;
   color: var(--muted);
   font-size: 14px;
+  min-width: 0;
+  min-height: 28px;
 }
-button.quiet:hover {
-  color: var(--ink);
-  border-color: var(--line);
+@media (hover: hover) {
+  button.quiet:hover {
+    color: var(--ink);
+    border-color: var(--line);
+  }
 }
 button:disabled {
   opacity: 0.45;
@@ -101,6 +134,22 @@ button:disabled {
 .file {
   font: 13px var(--mono);
   color: var(--muted);
+  /* Defensive: minimum content size in flexbox. Without min-width: 0 a
+     long file name cannot shrink, and it pushes the buttons off the bar. */
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+}
+.file .name {
+  /* Defensive: long content. One line, cut with an ellipsis. */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file .dirty {
+  flex: none;
+  white-space: pre;
 }
 .file .dirty {
   color: var(--accent);
@@ -116,7 +165,14 @@ main {
 
 .start {
   max-width: 560px;
-  margin: 12vh auto 0;
+  margin: 0 auto;
+}
+/* Defensive: vertical media queries. The start screen drops down the page
+   only when the window is tall enough to spare the room. */
+@media (min-height: 600px) {
+  .start {
+    margin-top: 12vh;
+  }
 }
 .start h1 {
   font: 600 40px/1.1 var(--serif);
@@ -163,14 +219,18 @@ main {
 }
 @media (min-width: 860px) {
   .columns {
-    grid-template-columns: 1fr 1fr;
+    /* Defensive: minimum content size in CSS grid. minmax(0, 1fr) lets a
+       column shrink below its longest word. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
 
 .relation > header {
   display: flex;
+  /* Defensive: flexbox wrapping. */
+  flex-wrap: wrap;
   align-items: baseline;
-  gap: 12px;
+  gap: 4px 12px;
   border-bottom: 2px solid var(--ink);
   padding-bottom: 6px;
 }
@@ -203,6 +263,7 @@ main {
 }
 
 .card {
+  container-type: inline-size;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -223,9 +284,17 @@ main {
 .card dl {
   margin: 10px 0 0;
   display: grid;
-  grid-template-columns: max-content 1fr;
-  gap: 4px 12px;
+  /* Defensive: CSS grid fixed values. One column by default; the label
+     column appears only when the card is wide enough for it. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 12px;
   font-size: 15px;
+}
+@container (min-width: 340px) {
+  .card dl {
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 4px 12px;
+  }
 }
 .card dt {
   font: 12px/1.9 var(--mono);
@@ -244,12 +313,16 @@ main {
 .card .meta {
   display: flex;
   flex-wrap: wrap;
+  /* Defensive: default flexbox stretching. A tag keeps its own height
+     next to a link that wraps onto two lines. */
+  align-items: center;
   gap: 4px 12px;
   margin-top: 10px;
   font-size: 13px;
   color: var(--muted);
 }
 .tag {
+  max-width: 100%;
   font: 12px var(--mono);
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -281,6 +354,14 @@ main {
 dialog {
   width: min(560px, calc(100vw - 32px));
   max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  /* Defensive: scrollbars on demand, scroll chaining, scrollbar gutter.
+     The dialog scrolls only when it must, the page behind it does not
+     scroll when the dialog reaches its end, and the form does not shift
+     when the scrollbar appears. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--card);
@@ -301,8 +382,10 @@ dialog .lead {
 }
 form .row {
   display: grid;
-  gap: 12px;
-  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+  /* Defensive: CSS grid fixed values, auto-fit. Two fields side by side
+     when each has 180px, one above the other when not. */
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
 }
 label,
 fieldset {
@@ -324,7 +407,9 @@ textarea {
   display: block;
   width: 100%;
   margin-top: 4px;
-  font: 15px/1.4 var(--sans);
+  /* Defensive: input zoom on iOS Safari. Below 16px Safari zooms the page
+     when a field takes focus. */
+  font: 16px/1.4 var(--sans);
   color: var(--ink);
   background: var(--paper);
   border: 1px solid var(--line);
@@ -333,6 +418,9 @@ textarea {
 }
 textarea {
   resize: vertical;
+  /* Defensive: fixed sizes. A minimum, not a fixed height. */
+  min-height: 60px;
+  max-height: 40vh;
 }
 fieldset {
   border: 0;
@@ -369,6 +457,7 @@ fieldset .choices label {
 }
 dialog .buttons {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
   margin-top: 4px;
@@ -378,9 +467,13 @@ dialog .buttons {
 
 .toast {
   position: fixed;
-  left: 50%;
+  /* Defensive: long content, fixed sizes. The toast is as wide as its
+     message, up to the window less a margin, and a long message wraps. */
+  left: 16px;
+  right: 16px;
   bottom: 20px;
-  transform: translateX(-50%);
+  width: fit-content;
+  margin-inline: auto;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -389,9 +482,9 @@ dialog .buttons {
   border-radius: 8px;
   padding: 8px 8px 8px 14px;
   font-size: 14px;
-  max-width: calc(100vw - 32px);
 }
 .toast button {
+  flex: none;
   color: var(--paper);
   border-color: transparent;
   text-decoration: underline;
