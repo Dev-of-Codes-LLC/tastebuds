@@ -32,7 +32,7 @@ Start the app, then open a file or start a new one. [The video](profile-app/prof
 
 ### Add an entry
 
-The form asks for a name, a kind, a date, the relation, and one or more links. Tags and notes are optional. The app makes the entry's `id` from its name, and never changes it.
+The form asks for a name, a kind, a date, the relation, and one or more links. Tags and notes are optional. Notes are written in the [editor field](editor-field.md), with bold, italic, links and bullet lists. The app makes the entry's `id` from its name, and never changes it.
 
 If you select **Inspiration**, the form also asks for two things:
 
@@ -119,7 +119,6 @@ Each promise is checked by a test in `test/app.test.mjs`.
 - It does not open a file that is not valid. It lists the problems, and you fix the file by hand.
 - It does not keep a draft. If you close the tab before you save, the changes are gone. The browser asks first.
 - It does not edit the `id` of an entry, or reorder entries.
-- It does not format notes. Notes are plain text until the editor field of issue #3 exists.
 - It is not hosted anywhere. You run it from a checkout.
 
 > **Not verified:** Open and save through the browser's file picker, and the Firefox and Safari download path. The checks in the browser used the built-in example.
