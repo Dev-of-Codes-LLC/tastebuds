@@ -1,0 +1,81 @@
+{
+  "$schema": "../schema/profile.schema.json",
+  "formatVersion": "1.0",
+  "owner": {
+    "type": "Person",
+    "name": "Juniper Vale",
+    "sameAs": [
+      "https://junipervale.example/",
+      "https://code.example/junipervale"
+    ]
+  },
+  "entries": [
+    {
+      "id": "ansel-marrow",
+      "name": "Ansel Marrow",
+      "kind": "person",
+      "relation": "tasteReference",
+      "sameAs": [
+        "https://anselmarrow.example/",
+        "https://code.example/anselmarrow"
+      ],
+      "tags": ["motion", "restraint", "typography"],
+      "notes": "Page transitions that never get in the way of reading.",
+      "added": "2026-03-02"
+    },
+    {
+      "id": "slow-shader-sundays",
+      "name": "Slow Shader Sundays",
+      "kind": "channel",
+      "relation": "tasteReference",
+      "sameAs": ["https://video.example/@slowshadersundays"],
+      "tags": ["shaders", "teaching"],
+      "added": "2026-03-09"
+    },
+    {
+      "id": "lantern-and-loom",
+      "name": "Lantern & Loom",
+      "kind": "studio",
+      "relation": "inspiration",
+      "sameAs": ["https://lanternandloom.example/"],
+      "tags": ["craft", "colour"],
+      "notes": "Started as a taste reference in 2025. Moved here when the palette shipped.",
+      "added": "2025-11-18",
+      "gave": "The idea of one warm accent colour against a paper background.",
+      "creditedIn": [
+        {
+          "name": "Field Notes, the 2026 redesign",
+          "url": "https://junipervale.example/field-notes/colophon"
+        }
+      ]
+    },
+    {
+      "id": "the-quiet-grid",
+      "name": "The Quiet Grid",
+      "kind": "book",
+      "relation": "inspiration",
+      "sameAs": ["https://books.example/the-quiet-grid"],
+      "tags": ["layout", "restraint"],
+      "added": "2026-01-05",
+      "gave": "The eight-column layout and its wide outer margins.",
+      "creditedIn": [
+        {
+          "name": "Field Notes, the 2026 redesign",
+          "url": "https://junipervale.example/field-notes/colophon"
+        },
+        { "name": "Tide Tables, a printed zine" }
+      ]
+    },
+    {
+      "id": "harbour-at-four",
+      "name": "Harbour at Four",
+      "kind": "work",
+      "relation": "inspiration",
+      "sameAs": ["https://films.example/harbour-at-four"],
+      "tags": ["pacing", "sound"],
+      "added": "2026-02-14",
+      "gave": "Long holds on a single frame before anything moves.",
+      "creditedIn": [{ "name": "Tide Tables, a printed zine" }]
+    }
+  ]
+}
