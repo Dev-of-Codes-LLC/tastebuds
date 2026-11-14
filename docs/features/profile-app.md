@@ -4,10 +4,10 @@ A page in your browser opens a profile file, edits it, shows it, and saves it ba
 
 | | |
 |---|---|
-| Status | In review as of 2026-11-13. The narrated video is not made yet |
+| Status | Merged 2026-11-13. The video is in review as of 2026-11-13 |
 | Area | Browser app |
 | Delivered in | Issue #2, "Build the app to edit and view a profile" |
-| Related | [Profile format](profile-format.md) |
+| Related | [Profile format](profile-format.md), [the video](profile-app/profile-app.mp4) (72 seconds, narrated) |
 
 ## At a glance
 
@@ -23,7 +23,7 @@ A profile is a JSON file, and JSON is slow to edit by hand. The app gives the fi
 
 ## How it works
 
-Start the app, then open a file or start a new one.
+Start the app, then open a file or start a new one. [The video](profile-app/profile-app.mp4) shows the whole path in 72 seconds: it adds an entry to the example, then moves it to inspirations. Its words are in [profile-app.srt](profile-app/profile-app.srt).
 
 1. Run `npm install`, then `npm run dev`. Open the address that the command prints.
 2. Select **New profile**, **Open a file** or **See the example**.
@@ -70,13 +70,13 @@ Select **Remove**. A message at the bottom of the page offers **Undo** for 8 sec
   "position": 2,
   "item": {
     "@type": "CreativeWork",
-    "@id": "#entry-the-quiet-grid",
-    "name": "The Quiet Grid",
-    "url": "https://books.example/the-quiet-grid",
-    "sameAs": ["https://books.example/the-quiet-grid"],
-    "keywords": "layout, restraint"
+    "@id": "#entry-the-patient-pot",
+    "name": "The Patient Pot",
+    "url": "https://books.example/the-patient-pot",
+    "sameAs": ["https://books.example/the-patient-pot"],
+    "keywords": "slow-cooking, comfort"
   },
-  "description": "The eight-column layout and its wide outer margins."
+  "description": "The slow tomato sauce that starts every Sunday dinner."
 }
 ```
 
@@ -149,6 +149,7 @@ Each promise is checked by a test in `test/app.test.mjs`.
 | Add, move to inspirations, move back, remove and undo, in the browser | pass |
 | Light and dark theme, desktop and phone width | pass |
 | No sideways scroll at 320px with a 160-letter name, a 220-letter link and 30 tags | pass |
+| The video plays the real app: add an entry, move it to inspirations | pass |
 | Open and save with a real file | not checked |
 
 ## Technical appendix
@@ -161,5 +162,6 @@ Each promise is checked by a test in `test/app.test.mjs`.
 | `src/explain.ts` | Turns a problem into a sentence about a form field |
 | `src/jsonld.ts` | The JSON-LD export |
 | `src/file.ts` | Open, save and download |
+| `video/storyboard.json` | The script of the video: each line of narration and the clicks and keys that go with it |
 
 Commands: `npm run dev` (the app), `npm run build` (a static copy in `dist/`), `npm test`, `npm run validate -- <file>`. Node 22.18 or newer runs the TypeScript files directly. The app uses Vite, TypeScript, `ajv` and `ajv-formats`.

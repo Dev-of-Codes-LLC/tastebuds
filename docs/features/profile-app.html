@@ -6,7 +6,7 @@
 <title>Profile app</title>
 <meta name="description" content="A page in your browser opens a profile file, edits it, shows it, and saves it back to your disk.">
 <meta name="color-scheme" content="light dark">
-<meta name="source-sha256" content="c2b79b6b9229cb9db663c86782037fc543488dc662c965c7d14b208c4ab6a868">
+<meta name="source-sha256" content="cfc85fcf1bb28e33d8bedd2e4ef197375a17a86a11647062733c3fa4d7ef0a40">
 <meta name="link-base" content="">
 <script>
   // Apply a saved theme before first paint so the page never flashes.
@@ -213,7 +213,7 @@ figure.diagram svg { display: block; width: 100%; max-width: 56rem; height: auto
 <header class="panel panel-title" id="top">
 <h1>Profile app</h1>
 <p>A page in your browser opens a profile file, edits it, shows it, and saves it back to your disk.</p>
-<dl class="meta"><dt>Status</dt><dd>In review as of 2026-11-13. The narrated video is not made yet</dd><dt>Area</dt><dd>Browser app</dd><dt>Delivered in</dt><dd>Issue #2, &quot;Build the app to edit and view a profile&quot;</dd><dt>Related</dt><dd><a href="profile-format.html">Profile format</a></dd></dl>
+<dl class="meta"><dt>Status</dt><dd>Merged 2026-11-13. The video is in review as of 2026-11-13</dd><dt>Area</dt><dd>Browser app</dd><dt>Delivered in</dt><dd>Issue #2, &quot;Build the app to edit and view a profile&quot;</dd><dt>Related</dt><dd><a href="profile-format.html">Profile format</a>, the video (72 seconds, narrated)</dd></dl>
 <nav class="index" aria-label="On this sheet"><ol><li><a href="#at-a-glance"><span class="chip">A</span> <span>At a glance</span></a></li><li><a href="#why-it-exists"><span class="chip">B</span> <span>Why it exists</span></a></li><li><a href="#how-it-works"><span class="chip">C</span> <span>How it works</span></a></li><li><a href="#defensive-styles"><span class="chip">D</span> <span>Defensive styles</span></a></li><li><a href="#what-it-guarantees"><span class="chip">E</span> <span>What it guarantees</span></a></li><li><a href="#what-it-does-not-do"><span class="chip">F</span> <span>What it does not do</span></a></li><li><a href="#when-something-goes-wrong"><span class="chip">G</span> <span>When something goes wrong</span></a></li><li><a href="#key-decisions"><span class="chip">H</span> <span>Key decisions</span></a></li><li><a href="#verification"><span class="chip">I</span> <span>Verification</span></a></li><li><a href="#technical-appendix"><span class="chip">J</span> <span>Technical appendix</span></a></li></ol></nav>
 </header>
 <section class="panel" id="at-a-glance" aria-labelledby="at-a-glance-heading">
@@ -226,7 +226,7 @@ figure.diagram svg { display: block; width: 100%; max-width: 56rem; height: auto
 </section>
 <section class="panel wide" id="how-it-works" aria-labelledby="how-it-works-heading">
 <div class="panel-head"><h2 id="how-it-works-heading"><span class="chip">C</span> How it works<a class="anchor" href="#how-it-works" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">procedure</span></div>
-<p>Start the app, then open a file or start a new one.</p>
+<p>Start the app, then open a file or start a new one. The video shows the whole path in 72 seconds: it adds an entry to the example, then moves it to inspirations. Its words are in profile-app.srt.</p>
 <ol><li>Run <code>npm install</code>, then <code>npm run dev</code>. Open the address that the command prints.</li><li>Select <strong>New profile</strong>, <strong>Open a file</strong> or <strong>See the example</strong>.</li><li>Select <strong>Add</strong> above a list to add an entry to that list.</li><li>Select <strong>Save</strong>. The top bar shows &quot;not saved&quot; until you do.</li></ol>
 <h3 id="add-an-entry">Add an entry<a class="anchor" href="#add-an-entry" aria-hidden="true" tabindex="-1">#</a></h3>
 <p>The form asks for a name, a kind, a date, the relation, and one or more links. Tags and notes are optional. The app makes the entry's <code>id</code> from its name, and never changes it.</p>
@@ -245,13 +245,13 @@ figure.diagram svg { display: block; width: 100%; max-width: 56rem; height: auto
   &quot;position&quot;: 2,
   &quot;item&quot;: {
     &quot;@type&quot;: &quot;CreativeWork&quot;,
-    &quot;@id&quot;: &quot;#entry-the-quiet-grid&quot;,
-    &quot;name&quot;: &quot;The Quiet Grid&quot;,
-    &quot;url&quot;: &quot;https://books.example/the-quiet-grid&quot;,
-    &quot;sameAs&quot;: [&quot;https://books.example/the-quiet-grid&quot;],
-    &quot;keywords&quot;: &quot;layout, restraint&quot;
+    &quot;@id&quot;: &quot;#entry-the-patient-pot&quot;,
+    &quot;name&quot;: &quot;The Patient Pot&quot;,
+    &quot;url&quot;: &quot;https://books.example/the-patient-pot&quot;,
+    &quot;sameAs&quot;: [&quot;https://books.example/the-patient-pot&quot;],
+    &quot;keywords&quot;: &quot;slow-cooking, comfort&quot;
   },
-  &quot;description&quot;: &quot;The eight-column layout and its wide outer margins.&quot;
+  &quot;description&quot;: &quot;The slow tomato sauce that starts every Sunday dinner.&quot;
 }</code></pre>
 <p><em>Illustrative example, not real data.</em></p>
 </section>
@@ -281,19 +281,19 @@ figure.diagram svg { display: block; width: 100%; max-width: 56rem; height: auto
 </section>
 <section class="panel wide" id="verification" aria-labelledby="verification-heading">
 <div class="panel-head"><h2 id="verification-heading"><span class="chip">I</span> Verification<a class="anchor" href="#verification" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">evidence</span></div>
-<div class="table-wrap"><table><thead><tr><th scope="col">Check</th><th scope="col">Outcome</th></tr></thead><tbody><tr><td data-label="Check">33 tests, <code>npm test</code></td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">Type check and production build, <code>npm run build</code></td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">Add, move to inspirations, move back, remove and undo, in the browser</td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">Light and dark theme, desktop and phone width</td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">No sideways scroll at 320px with a 160-letter name, a 220-letter link and 30 tags</td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">Open and save with a real file</td><td class="status status-na" data-label="Outcome">not checked</td></tr></tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th scope="col">Check</th><th scope="col">Outcome</th></tr></thead><tbody><tr><td data-label="Check">33 tests, <code>npm test</code></td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">Type check and production build, <code>npm run build</code></td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">Add, move to inspirations, move back, remove and undo, in the browser</td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">Light and dark theme, desktop and phone width</td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">No sideways scroll at 320px with a 160-letter name, a 220-letter link and 30 tags</td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">The video plays the real app: add an entry, move it to inspirations</td><td class="status status-ok" data-label="Outcome">pass</td></tr><tr><td data-label="Check">Open and save with a real file</td><td class="status status-na" data-label="Outcome">not checked</td></tr></tbody></table></div>
 </section>
 <section class="panel wide" id="technical-appendix" aria-labelledby="technical-appendix-heading">
 <div class="panel-head"><h2 id="technical-appendix-heading"><span class="chip">J</span> Technical appendix<a class="anchor" href="#technical-appendix" aria-hidden="true" tabindex="-1">#</a></h2><span class="caption">reference</span></div>
-<div class="table-wrap"><table><thead><tr><th scope="col">File</th><th scope="col">What it is</th></tr></thead><tbody><tr><td data-label="File"><code>index.html</code>, <code>src/main.ts</code>, <code>src/style.css</code></td><td data-label="What it is">The page: view, dialogs, top bar</td></tr><tr><td data-label="File"><code>src/profile.ts</code></td><td data-label="What it is">The types, and the changes to a profile</td></tr><tr><td data-label="File"><code>src/validate.ts</code></td><td data-label="What it is">The check: the schema plus unique ids</td></tr><tr><td data-label="File"><code>src/explain.ts</code></td><td data-label="What it is">Turns a problem into a sentence about a form field</td></tr><tr><td data-label="File"><code>src/jsonld.ts</code></td><td data-label="What it is">The JSON-LD export</td></tr><tr><td data-label="File"><code>src/file.ts</code></td><td data-label="What it is">Open, save and download</td></tr></tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th scope="col">File</th><th scope="col">What it is</th></tr></thead><tbody><tr><td data-label="File"><code>index.html</code>, <code>src/main.ts</code>, <code>src/style.css</code></td><td data-label="What it is">The page: view, dialogs, top bar</td></tr><tr><td data-label="File"><code>src/profile.ts</code></td><td data-label="What it is">The types, and the changes to a profile</td></tr><tr><td data-label="File"><code>src/validate.ts</code></td><td data-label="What it is">The check: the schema plus unique ids</td></tr><tr><td data-label="File"><code>src/explain.ts</code></td><td data-label="What it is">Turns a problem into a sentence about a form field</td></tr><tr><td data-label="File"><code>src/jsonld.ts</code></td><td data-label="What it is">The JSON-LD export</td></tr><tr><td data-label="File"><code>src/file.ts</code></td><td data-label="What it is">Open, save and download</td></tr><tr><td data-label="File"><code>video/storyboard.json</code></td><td data-label="What it is">The script of the video: each line of narration and the clicks and keys that go with it</td></tr></tbody></table></div>
 <p>Commands: <code>npm run dev</code> (the app), <code>npm run build</code> (a static copy in <code>dist/</code>), <code>npm test</code>, <code>npm run validate -- &lt;file&gt;</code>. Node 22.18 or newer runs the TypeScript files directly. The app uses Vite, TypeScript, <code>ajv</code> and <code>ajv-formats</code>.</p>
 </section>
     <footer class="title-block" aria-label="Title block">
       <div class="tb-cell tb-title"><span class="tb-label">Title</span><span class="tb-value">Profile app</span></div>
       <div class="tb-cell tb-mono"><span class="tb-label">Source</span><span class="tb-value">docs/features/profile-app.md</span></div>
       <div class="tb-cell"><span class="tb-label">Owner</span><span class="tb-value">—</span></div>
-      <div class="tb-cell"><span class="tb-label">Status</span><span class="tb-value">In review as of 2026-11-13. The narrated video is not made yet</span></div>
-      <div class="tb-cell tb-mono"><span class="tb-label">Rev</span><span class="tb-value">c2b79b6b</span></div>
+      <div class="tb-cell"><span class="tb-label">Status</span><span class="tb-value">Merged 2026-11-13. The video is in review as of 2026-11-13</span></div>
+      <div class="tb-cell tb-mono"><span class="tb-label">Rev</span><span class="tb-value">cfc85fcf</span></div>
       <div class="tb-cell tb-mono"><span class="tb-label">Rendered</span><span class="tb-value">2026-11-14</span></div>
       <div class="tb-cell tb-mono"><span class="tb-label">Sheet</span><span class="tb-value">1 of 1</span></div>
       <div class="tb-cell tb-mono"><span class="tb-label">Note</span><span class="tb-value">Markdown is the source of record</span></div>

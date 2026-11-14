@@ -27,53 +27,53 @@ test("every kind maps to a schema.org type", () => {
 
 test("a taste reference cannot say what it gave", () => {
   const p = example();
-  entry(p, "ansel-marrow").gave = "A hover effect.";
+  entry(p, "teo-okafor").gave = "A garnish.";
   assert.notDeepEqual(validate(p), []);
 });
 
 test("a taste reference cannot be credited in a work", () => {
   const p = example();
-  entry(p, "ansel-marrow").creditedIn = [{ name: "Some site" }];
+  entry(p, "teo-okafor").creditedIn = [{ name: "Some site" }];
   assert.notDeepEqual(validate(p), []);
 });
 
 test("an inspiration must say what it gave", () => {
   const p = example();
-  delete entry(p, "the-quiet-grid").gave;
+  delete entry(p, "the-patient-pot").gave;
   assert.notDeepEqual(validate(p), []);
 });
 
 test("an inspiration must name the work that credits it", () => {
   const p = example();
-  entry(p, "the-quiet-grid").creditedIn = [];
+  entry(p, "the-patient-pot").creditedIn = [];
   assert.notDeepEqual(validate(p), []);
 });
 
 test("a taste reference becomes an inspiration by gaining both fields", () => {
   const p = example();
-  const e = entry(p, "ansel-marrow");
+  const e = entry(p, "teo-okafor");
   e.relation = "inspiration";
   assert.notDeepEqual(validate(p), []);
-  e.gave = "The fade between pages.";
-  e.creditedIn = [{ name: "Field Notes, the 2026 redesign" }];
+  e.gave = "Plating on bare wood boards.";
+  e.creditedIn = [{ name: "Sunday Table, a cookbook" }];
   assert.deepEqual(validate(p), []);
 });
 
 test("an entry needs at least one link", () => {
   const p = example();
-  entry(p, "ansel-marrow").sameAs = [];
+  entry(p, "teo-okafor").sameAs = [];
   assert.notDeepEqual(validate(p), []);
 });
 
 test("links must be http or https", () => {
   const p = example();
-  entry(p, "ansel-marrow").sameAs = ["ftp://anselmarrow.example/"];
+  entry(p, "teo-okafor").sameAs = ["ftp://teookafor.example/"];
   assert.notDeepEqual(validate(p), []);
 });
 
 test("the date added must be a real date", () => {
   const p = example();
-  entry(p, "ansel-marrow").added = "2026-02-30";
+  entry(p, "teo-okafor").added = "2026-02-30";
   assert.notDeepEqual(validate(p), []);
 });
 
@@ -85,7 +85,7 @@ test("entry ids must be unique", () => {
 
 test("unknown fields are rejected", () => {
   const p = example();
-  entry(p, "ansel-marrow").influence = "high";
+  entry(p, "teo-okafor").influence = "high";
   assert.notDeepEqual(validate(p), []);
 });
 

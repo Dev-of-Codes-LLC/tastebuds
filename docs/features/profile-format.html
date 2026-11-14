@@ -6,7 +6,7 @@
 <title>Profile format</title>
 <meta name="description" content="One JSON file holds a whole taste profile: who it belongs to, whose taste they watch, and what shaped their work.">
 <meta name="color-scheme" content="light dark">
-<meta name="source-sha256" content="31794ece237e5fcf314054be6030943a1eee66bac296829a7af8090c55e038fb">
+<meta name="source-sha256" content="a175b944fb29230fb40d2c586d53e457e34b8d7732701309be6e57040cecc8ef">
 <meta name="link-base" content="">
 <script>
   // Apply a saved theme before first paint so the page never flashes.
@@ -239,14 +239,14 @@ figure.diagram svg { display: block; width: 100%; max-width: 56rem; height: auto
 <div class="table-wrap stack"><table><thead><tr><th scope="col"></th><th scope="col">Taste reference</th><th scope="col">Inspiration</th></tr></thead><tbody><tr><td data-label="">Meaning</td><td data-label="Taste reference">You watch this entity's taste. You took nothing from it yet</td><td data-label="Inspiration">It gave something to your work, and that work credits it</td></tr><tr><td data-label=""><code>gave</code></td><td data-label="Taste reference">Not allowed</td><td data-label="Inspiration">Required</td></tr><tr><td data-label=""><code>creditedIn</code></td><td data-label="Taste reference">Not allowed</td><td data-label="Inspiration">Required, one or more</td></tr></tbody></table></div>
 <p>To move an entry from taste reference to inspiration, change <code>relation</code> and add <code>gave</code> and <code>creditedIn</code>. Keep the <code>id</code> and the <code>added</code> date.</p>
 <pre><code class="language-json">{
-  &quot;id&quot;: &quot;the-quiet-grid&quot;,
-  &quot;name&quot;: &quot;The Quiet Grid&quot;,
+  &quot;id&quot;: &quot;the-patient-pot&quot;,
+  &quot;name&quot;: &quot;The Patient Pot&quot;,
   &quot;kind&quot;: &quot;book&quot;,
   &quot;relation&quot;: &quot;inspiration&quot;,
-  &quot;sameAs&quot;: [&quot;https://books.example/the-quiet-grid&quot;],
+  &quot;sameAs&quot;: [&quot;https://books.example/the-patient-pot&quot;],
   &quot;added&quot;: &quot;2026-01-05&quot;,
-  &quot;gave&quot;: &quot;The eight-column layout and its wide outer margins.&quot;,
-  &quot;creditedIn&quot;: [{ &quot;name&quot;: &quot;Field Notes, the 2026 redesign&quot; }]
+  &quot;gave&quot;: &quot;The slow tomato sauce that starts every Sunday dinner.&quot;,
+  &quot;creditedIn&quot;: [{ &quot;name&quot;: &quot;Sunday Table, a cookbook&quot; }]
 }</code></pre>
 <p><em>Illustrative example, not real data.</em></p>
 </section>
@@ -282,7 +282,7 @@ figure.diagram svg { display: block; width: 100%; max-width: 56rem; height: auto
       <div class="tb-cell tb-mono"><span class="tb-label">Source</span><span class="tb-value">docs/features/profile-format.md</span></div>
       <div class="tb-cell"><span class="tb-label">Owner</span><span class="tb-value">—</span></div>
       <div class="tb-cell"><span class="tb-label">Status</span><span class="tb-value">In review as of 2026-11-13</span></div>
-      <div class="tb-cell tb-mono"><span class="tb-label">Rev</span><span class="tb-value">31794ece</span></div>
+      <div class="tb-cell tb-mono"><span class="tb-label">Rev</span><span class="tb-value">a175b944</span></div>
       <div class="tb-cell tb-mono"><span class="tb-label">Rendered</span><span class="tb-value">2026-11-14</span></div>
       <div class="tb-cell tb-mono"><span class="tb-label">Sheet</span><span class="tb-value">1 of 1</span></div>
       <div class="tb-cell tb-mono"><span class="tb-label">Note</span><span class="tb-value">Markdown is the source of record</span></div>
