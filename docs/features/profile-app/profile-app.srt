@@ -1,59 +1,63 @@
 1
-00:00:00,152 --> 00:00:06,979
+00:00:00,146 --> 00:00:06,972
 Tastebuds keeps a taste profile. This is how you add an entry, and how you move it once it shapes your work.
 
 2
-00:00:07,596 --> 00:00:13,719
+00:00:07,565 --> 00:00:13,688
 The app runs in your browser. A profile is one file on your disk, so there is no account.
 
 3
-00:00:13,785 --> 00:00:18,159
+00:00:13,762 --> 00:00:18,135
 Open the example. It is the profile of Rosa, a home cook.
 
 4
-00:00:18,206 --> 00:00:28,361
+00:00:18,183 --> 00:00:28,338
 A profile keeps two lists apart. Inspirations gave something to her cooking, and she credits each one. Taste references are cooks whose taste she watches.
 
 5
-00:00:28,421 --> 00:00:31,429
+00:00:28,408 --> 00:00:31,416
 Add a taste reference: a bakery she likes.
 
 6
-00:00:31,492 --> 00:00:35,034
+00:00:31,471 --> 00:00:35,012
 Give it a name, a kind, and a link to its own site.
 
 7
-00:00:35,089 --> 00:00:37,158
+00:00:35,047 --> 00:00:37,116
 Tags say what you see in it.
 
 8
-00:00:37,174 --> 00:00:39,819
-Save, and it joins the taste you watch.
+00:00:37,133 --> 00:00:39,693
+Notes take bold, links and lists.
 
 9
-00:00:39,855 --> 00:00:46,917
-Months later, your cookbook borrows the way it folds butter into its morning buns. Now it has shaped your work.
+00:00:39,728 --> 00:00:42,373
+Save, and it joins the taste you watch.
 
 10
-00:00:46,971 --> 00:00:49,147
-So move it to inspirations.
+00:00:42,408 --> 00:00:49,469
+Months later, your cookbook borrows the way it folds butter into its morning buns. Now it has shaped your work.
 
 11
-00:00:49,170 --> 00:00:53,949
-The app asks two things: what it gave, and which work of yours credits it.
+00:00:49,524 --> 00:00:51,700
+So move it to inspirations.
 
 12
-00:00:54,091 --> 00:00:57,846
-Save. The entry moves across, with its credit beside it.
+00:00:51,749 --> 00:00:56,527
+The app asks two things: what it gave, and which work of yours credits it.
 
 13
-00:00:57,897 --> 00:01:04,148
-A taste reference never shows as an influence. An inspiration always names what it gave.
+00:00:56,755 --> 00:01:00,510
+Save. The entry moves across, with its credit beside it.
 
 14
-00:01:04,182 --> 00:01:07,489
-Then save the file, or export it for a web page.
+00:01:00,570 --> 00:01:06,821
+A taste reference never shows as an influence. An inspiration always names what it gave.
 
 15
-00:01:08,069 --> 00:01:11,589
+00:01:06,853 --> 00:01:10,160
+Then save the file, or export it for a web page.
+
+16
+00:01:10,770 --> 00:01:14,290
 Tastebuds is open source. The guide has the rest.

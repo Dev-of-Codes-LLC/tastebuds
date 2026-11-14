@@ -9,7 +9,7 @@
   "stage": "plain",
   "systems": {
     "app": {
-      "repo": "..",
+      "repo": "../..",
       "baseUrl": "http://localhost:4173",
       "build": "npm run build",
       "serve": "npm run preview"
@@ -96,6 +96,17 @@
               "type": "dialog [name=tags]",
               "text": "butter, morning buns",
               "at": "Tags"
+            }
+          ]
+        },
+        {
+          "say": "Notes take bold, links and lists.",
+          "do": [
+            {
+              "type": "dialog .ef-content",
+              "text": "The best **morning buns** in town.",
+              "delay": 30,
+              "at": "Notes"
             }
           ]
         },

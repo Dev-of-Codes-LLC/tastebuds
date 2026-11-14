@@ -1,0 +1,47 @@
+1
+00:00:00,152 --> 00:00:08,003
+The notes in Tastebuds are written in a small editor field. Any web page can embed it. This is a first install.
+
+2
+00:00:08,569 --> 00:00:16,206
+Clone the repository, install, and build the field. Measured on one machine, the three commands took under five seconds.
+
+3
+00:00:16,824 --> 00:00:20,002
+The page needs three things. A stylesheet.
+
+4
+00:00:20,034 --> 00:00:23,042
+An empty element, for the field to build in.
+
+5
+00:00:23,075 --> 00:00:27,896
+And one call: createEditor, with that element and the text to start with.
+
+6
+00:00:27,927 --> 00:00:32,493
+Listen for change, and the page gets the new text after every edit.
+
+7
+00:00:33,037 --> 00:00:37,111
+Here is that page. The field opens with its starting notes.
+
+8
+00:00:37,179 --> 00:00:40,187
+Type, and the text below follows every key.
+
+9
+00:00:40,229 --> 00:00:44,432
+Two stars make a word bold as you type. So does control B.
+
+10
+00:00:44,462 --> 00:00:46,873
+A dash and a space start a list.
+
+11
+00:00:46,882 --> 00:00:53,858
+What the page receives is plain text: a small subset of Markdown, easy to read and easy to store.
+
+12
+00:00:54,420 --> 00:00:59,476
+createEditor makes the field. destroy removes it. The guide has the rest.
