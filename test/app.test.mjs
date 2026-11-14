@@ -35,7 +35,7 @@ const reference = {
 };
 
 test("a new profile is valid and empty", () => {
-  const p = newProfile({ type: "Person", name: "Juniper Vale" });
+  const p = newProfile({ type: "Person", name: "Rosa Marin" });
   assert.deepEqual(validate(p), []);
   assert.equal(p.entries.length, 0);
 });
@@ -48,7 +48,7 @@ test("slug makes an id the format accepts", () => {
 
 test("freeId never repeats an id", () => {
   const p = example();
-  assert.equal(freeId(p, "Ansel Marrow"), "ansel-marrow-2");
+  assert.equal(freeId(p, "Teo Okafor"), "teo-okafor-2");
   assert.equal(freeId(p, "Someone New"), "someone-new");
   assert.equal(freeId(p, "***"), "entry");
 });
@@ -65,40 +65,40 @@ test("changes do not touch the profile they start from", () => {
   const before = example();
   const copy = structuredClone(before);
   addEntry(before, reference);
-  removeEntry(before, "ansel-marrow");
-  moveToInspiration(before, "ansel-marrow", "A fade.", [{ name: "A site" }]);
+  removeEntry(before, "teo-okafor");
+  moveToInspiration(before, "teo-okafor", "A garnish.", [{ name: "A site" }]);
   assert.deepEqual(before, copy);
 });
 
 test("removing an entry removes only that entry", () => {
-  const p = removeEntry(example(), "ansel-marrow");
+  const p = removeEntry(example(), "teo-okafor");
   assert.equal(p.entries.length, example().entries.length - 1);
-  assert.equal(p.entries.some((e) => e.id === "ansel-marrow"), false);
+  assert.equal(p.entries.some((e) => e.id === "teo-okafor"), false);
   assert.deepEqual(validate(p), []);
 });
 
 test("moving to inspiration keeps the id and the date", () => {
-  const before = example().entries.find((e) => e.id === "ansel-marrow");
-  const p = moveToInspiration(example(), "ansel-marrow", "The fade between pages.", [
-    { name: "Field Notes, the 2026 redesign" },
+  const before = example().entries.find((e) => e.id === "teo-okafor");
+  const p = moveToInspiration(example(), "teo-okafor", "Plating on bare wood boards.", [
+    { name: "Sunday Table, a cookbook" },
   ]);
-  const after = p.entries.find((e) => e.id === "ansel-marrow");
+  const after = p.entries.find((e) => e.id === "teo-okafor");
   assert.equal(after.relation, "inspiration");
   assert.equal(after.added, before.added);
-  assert.equal(after.gave, "The fade between pages.");
+  assert.equal(after.gave, "Plating on bare wood boards.");
   assert.deepEqual(validate(p), []);
 });
 
 test("moving to inspiration without what it gave is not valid", () => {
-  const p = moveToInspiration(example(), "ansel-marrow", "", []);
+  const p = moveToInspiration(example(), "teo-okafor", "", []);
   assert.notDeepEqual(validate(p), []);
 });
 
 test("changing an inspiration back to a taste reference drops what it gave", () => {
   const p0 = example();
-  const e = p0.entries.find((x) => x.id === "the-quiet-grid");
+  const e = p0.entries.find((x) => x.id === "the-patient-pot");
   const p = updateEntry(p0, e.id, { ...e, relation: "tasteReference" });
-  const after = p.entries.find((x) => x.id === "the-quiet-grid");
+  const after = p.entries.find((x) => x.id === "the-patient-pot");
   assert.equal("gave" in after, false);
   assert.equal("creditedIn" in after, false);
   assert.deepEqual(validate(p), []);
@@ -157,9 +157,9 @@ test("the export uses the schema.org type of each kind", () => {
     .filter((n) => n["@type"] === "ItemList")
     .flatMap((n) => n.itemListElement.map((li) => li.item));
   const type = (name) => items.find((i) => i.name === name)["@type"];
-  assert.equal(type("Ansel Marrow"), "Person");
-  assert.equal(type("Lantern & Loom"), "Organization");
-  assert.equal(type("The Quiet Grid"), "CreativeWork");
+  assert.equal(type("Teo Okafor"), "Person");
+  assert.equal(type("Casa Lumbre"), "Organization");
+  assert.equal(type("The Patient Pot"), "CreativeWork");
   assert.equal(graph[0]["@type"], "Person");
 });
 
@@ -167,20 +167,20 @@ test("the export lists each crediting work once, with every entry it credits", (
   const graph = toJsonLd(example())["@graph"];
   const works = graph.filter((n) => n["@type"] === "CreativeWork");
   assert.equal(works.length, 2);
-  const zine = works.find((w) => w.name === "Tide Tables, a printed zine");
-  assert.deepEqual(zine.mentions.map((m) => m["@id"]).sort(), [
-    "#entry-harbour-at-four",
-    "#entry-the-quiet-grid",
+  const club = works.find((w) => w.name === "The Friday supper club");
+  assert.deepEqual(club.mentions.map((m) => m["@id"]).sort(), [
+    "#entry-casa-lumbre",
+    "#entry-the-patient-pot",
   ]);
-  assert.deepEqual(zine.creator, { "@id": "#owner" });
+  assert.deepEqual(club.creator, { "@id": "#owner" });
 });
 
 test("the export leaves the notes out", () => {
-  assert.equal(JSON.stringify(toJsonLd(example())).includes("Page transitions"), false);
+  assert.equal(JSON.stringify(toJsonLd(example())).includes("Plates that look"), false);
 });
 
 test("problems read as sentences about the form's fields", () => {
-  const p = moveToInspiration(example(), "ansel-marrow", "", []);
+  const p = moveToInspiration(example(), "teo-okafor", "", []);
   assert.deepEqual(explainAll(validate(p)), [
     "What it gave: cannot be empty.",
     "Credited in: add one or more.",

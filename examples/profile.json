@@ -3,79 +3,108 @@
   "formatVersion": "1.0",
   "owner": {
     "type": "Person",
-    "name": "Juniper Vale",
+    "name": "Rosa Marin",
     "sameAs": [
-      "https://junipervale.example/",
-      "https://code.example/junipervale"
+      "https://rosamarin.example/",
+      "https://photos.example/rosamarin"
     ]
   },
   "entries": [
     {
-      "id": "ansel-marrow",
-      "name": "Ansel Marrow",
+      "id": "teo-okafor",
+      "name": "Teo Okafor",
       "kind": "person",
       "relation": "tasteReference",
       "sameAs": [
-        "https://anselmarrow.example/",
-        "https://code.example/anselmarrow"
+        "https://teookafor.example/",
+        "https://photos.example/teookafor"
       ],
-      "tags": ["motion", "restraint", "typography"],
-      "notes": "Page transitions that never get in the way of reading.",
+      "tags": [
+        "plating",
+        "restraint"
+      ],
+      "notes": "Plates that look simple and never are.",
       "added": "2026-03-02"
     },
     {
-      "id": "slow-shader-sundays",
-      "name": "Slow Shader Sundays",
+      "id": "two-burner-kitchen",
+      "name": "Two Burner Kitchen",
       "kind": "channel",
       "relation": "tasteReference",
-      "sameAs": ["https://video.example/@slowshadersundays"],
-      "tags": ["shaders", "teaching"],
+      "sameAs": [
+        "https://video.example/@twoburnerkitchen"
+      ],
+      "tags": [
+        "weeknight",
+        "teaching"
+      ],
       "added": "2026-03-09"
     },
     {
-      "id": "lantern-and-loom",
-      "name": "Lantern & Loom",
+      "id": "casa-lumbre",
+      "name": "Casa Lumbre",
       "kind": "studio",
       "relation": "inspiration",
-      "sameAs": ["https://lanternandloom.example/"],
-      "tags": ["craft", "colour"],
-      "notes": "Started as a taste reference in 2025. Moved here when the palette shipped.",
+      "sameAs": [
+        "https://casalumbre.example/"
+      ],
+      "tags": [
+        "sharing",
+        "fire"
+      ],
+      "notes": "A restaurant I watched for a year. Moved here when the supper club began.",
       "added": "2025-11-18",
-      "gave": "The idea of one warm accent colour against a paper background.",
+      "gave": "Serving every dish in the middle of the table, to share.",
       "creditedIn": [
         {
-          "name": "Field Notes, the 2026 redesign",
-          "url": "https://junipervale.example/field-notes/colophon"
+          "name": "The Friday supper club"
         }
       ]
     },
     {
-      "id": "the-quiet-grid",
-      "name": "The Quiet Grid",
+      "id": "the-patient-pot",
+      "name": "The Patient Pot",
       "kind": "book",
       "relation": "inspiration",
-      "sameAs": ["https://books.example/the-quiet-grid"],
-      "tags": ["layout", "restraint"],
+      "sameAs": [
+        "https://books.example/the-patient-pot"
+      ],
+      "tags": [
+        "slow-cooking",
+        "comfort"
+      ],
       "added": "2026-01-05",
-      "gave": "The eight-column layout and its wide outer margins.",
+      "gave": "The slow tomato sauce that starts every Sunday dinner.",
       "creditedIn": [
         {
-          "name": "Field Notes, the 2026 redesign",
-          "url": "https://junipervale.example/field-notes/colophon"
+          "name": "Sunday Table, a cookbook",
+          "url": "https://rosamarin.example/sunday-table"
         },
-        { "name": "Tide Tables, a printed zine" }
+        {
+          "name": "The Friday supper club"
+        }
       ]
     },
     {
-      "id": "harbour-at-four",
-      "name": "Harbour at Four",
+      "id": "bread-at-dawn",
+      "name": "Bread at Dawn",
       "kind": "work",
       "relation": "inspiration",
-      "sameAs": ["https://films.example/harbour-at-four"],
-      "tags": ["pacing", "sound"],
+      "sameAs": [
+        "https://films.example/bread-at-dawn"
+      ],
+      "tags": [
+        "bread",
+        "patience"
+      ],
       "added": "2026-02-14",
-      "gave": "Long holds on a single frame before anything moves.",
-      "creditedIn": [{ "name": "Tide Tables, a printed zine" }]
+      "gave": "The overnight dough, shaped before sunrise.",
+      "creditedIn": [
+        {
+          "name": "Sunday Table, a cookbook",
+          "url": "https://rosamarin.example/sunday-table"
+        }
+      ]
     }
   ]
 }

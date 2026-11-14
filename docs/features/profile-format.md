@@ -73,14 +73,14 @@ To move an entry from taste reference to inspiration, change `relation` and add 
 
 ```json
 {
-  "id": "the-quiet-grid",
-  "name": "The Quiet Grid",
+  "id": "the-patient-pot",
+  "name": "The Patient Pot",
   "kind": "book",
   "relation": "inspiration",
-  "sameAs": ["https://books.example/the-quiet-grid"],
+  "sameAs": ["https://books.example/the-patient-pot"],
   "added": "2026-01-05",
-  "gave": "The eight-column layout and its wide outer margins.",
-  "creditedIn": [{ "name": "Field Notes, the 2026 redesign" }]
+  "gave": "The slow tomato sauce that starts every Sunday dinner.",
+  "creditedIn": [{ "name": "Sunday Table, a cookbook" }]
 }
 ```
 

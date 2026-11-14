@@ -1,0 +1,217 @@
+{
+  "id": "profile-app",
+  "title": "Tastebuds: add an entry, then give it credit",
+  "formats": [
+    "16:9"
+  ],
+  "voice": "kokoro:bm_george",
+  "captionStyle": "plain",
+  "stage": "plain",
+  "systems": {
+    "app": {
+      "repo": "..",
+      "baseUrl": "http://localhost:4173",
+      "build": "npm run build",
+      "serve": "npm run preview"
+    }
+  },
+  "scenes": [
+    {
+      "type": "card",
+      "template": "title",
+      "fields": {
+        "kicker": "Tastebuds",
+        "title": "Add an entry, then give it credit",
+        "subtitle": "The profile app, start to finish",
+        "mark": ""
+      },
+      "beats": [
+        {
+          "say": "Tastebuds keeps a taste profile. This is how you add an entry, and how you move it once it shapes your work."
+        }
+      ]
+    },
+    {
+      "type": "browser",
+      "system": "app",
+      "start": "/",
+      "beats": [
+        {
+          "say": "The app runs in your browser. A profile is one file on your disk, so there is no account."
+        },
+        {
+          "say": "Open the example. It is the profile of Rosa, a home cook.",
+          "do": [
+            {
+              "click": "text=See the example",
+              "at": "example"
+            },
+            {
+              "waitFor": ".columns"
+            }
+          ]
+        },
+        {
+          "say": "A profile keeps two lists apart. Inspirations gave something to her cooking, and she credits each one. Taste references are cooks whose taste she watches.",
+          "label": "two lists, *kept apart*"
+        },
+        {
+          "say": "Add a taste reference: a bakery she likes.",
+          "do": [
+            {
+              "click": ".relation.tasteReference header button",
+              "at": "Add"
+            },
+            {
+              "waitFor": "dialog[open]"
+            }
+          ],
+          "label": ""
+        },
+        {
+          "say": "Give it a name, a kind, and a link to its own site.",
+          "do": [
+            {
+              "type": "dialog [name=name]",
+              "text": "Sol Bakery",
+              "at": "name"
+            },
+            {
+              "select": "dialog [name=kind]",
+              "value": "studio",
+              "at": "kind"
+            },
+            {
+              "type": "dialog [name=sameAs]",
+              "text": "https://solbakery.example/",
+              "delay": 25,
+              "at": "link"
+            }
+          ]
+        },
+        {
+          "say": "Tags say what you see in it.",
+          "do": [
+            {
+              "type": "dialog [name=tags]",
+              "text": "butter, morning buns",
+              "at": "Tags"
+            }
+          ]
+        },
+        {
+          "say": "Save, and it joins the taste you watch.",
+          "do": [
+            {
+              "click": "dialog button.primary",
+              "at": "Save"
+            },
+            {
+              "waitFor": ".card[data-id=sol-bakery]"
+            },
+            {
+              "scroll": ".card[data-id=sol-bakery]"
+            },
+            {
+              "zoom": ".card[data-id=sol-bakery]",
+              "scale": 1.7
+            }
+          ],
+          "label": "a _taste reference_: nothing taken yet"
+        },
+        {
+          "say": "Months later, your cookbook borrows the way it folds butter into its morning buns. Now it has shaped your work.",
+          "hold": 1200,
+          "label": "then it *shapes* her work"
+        },
+        {
+          "say": "So move it to inspirations.",
+          "do": [
+            {
+              "click": ".card[data-id=sol-bakery] .move",
+              "at": "move"
+            },
+            {
+              "waitFor": "dialog[open]"
+            }
+          ],
+          "label": ""
+        },
+        {
+          "say": "The app asks two things: what it gave, and which work of yours credits it.",
+          "do": [
+            {
+              "type": "dialog [name=gave]",
+              "text": "The three-fold butter method in the morning buns.",
+              "delay": 30,
+              "at": "gave"
+            },
+            {
+              "type": "dialog [name=creditedIn]",
+              "text": "Sunday Table, a cookbook",
+              "delay": 30,
+              "at": "credits"
+            }
+          ]
+        },
+        {
+          "say": "Save. The entry moves across, with its credit beside it.",
+          "do": [
+            {
+              "click": "dialog button.primary",
+              "at": "Save"
+            },
+            {
+              "waitFor": ".relation.inspiration .card[data-id=sol-bakery]"
+            },
+            {
+              "scroll": ".relation.inspiration .card[data-id=sol-bakery]"
+            },
+            {
+              "zoom": ".relation.inspiration .card[data-id=sol-bakery]",
+              "scale": 1.7
+            }
+          ],
+          "label": "an *inspiration*: credited by name",
+          "hold": 2500
+        },
+        {
+          "say": "A taste reference never shows as an influence. An inspiration always names what it gave.",
+          "label": ""
+        },
+        {
+          "say": "Then save the file, or export it for a web page.",
+          "do": [
+            {
+              "unzoom": true
+            },
+            {
+              "scroll": -4000
+            },
+            {
+              "zoom": ".bar button.primary",
+              "scale": 1.5,
+              "at": "save"
+            }
+          ],
+          "hold": 2000
+        }
+      ]
+    },
+    {
+      "type": "card",
+      "template": "title",
+      "fields": {
+        "kicker": "Tastebuds",
+        "title": "Credit where it is due",
+        "subtitle": "Open source. One file. No account.",
+        "mark": ""
+      },
+      "beats": [
+        {
+          "say": "Tastebuds is open source. The guide has the rest."
+        }
+      ]
+    }
+  ]
+}

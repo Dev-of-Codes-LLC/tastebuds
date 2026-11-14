@@ -231,7 +231,7 @@ function inspirationFields(entry: Partial<Entry>) {
     name: "creditedIn",
     rows: 2,
     value: formatCredits(entry.creditedIn),
-    placeholder: "Field Notes | https://example.com/colophon",
+    placeholder: "Sunday Table | https://example.com/sunday-table",
   });
   const block = h(
     "div",
