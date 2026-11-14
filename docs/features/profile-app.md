@@ -4,10 +4,10 @@ A page in your browser opens a profile file, edits it, shows it, and saves it ba
 
 | | |
 |---|---|
-| Status | Merged 2026-11-13. The video is in review as of 2026-11-13 |
+| Status | Merged 2026-11-13. The video was made again on 2026-11-14, with the editor field in it |
 | Area | Browser app |
 | Delivered in | Issue #2, "Build the app to edit and view a profile" |
-| Related | [Profile format](profile-format.md), [the video](profile-app/profile-app.mp4) (72 seconds, narrated) |
+| Related | [Profile format](profile-format.md), [the video](profile-app/profile-app.mp4) (75 seconds, narrated) |
 
 ## At a glance
 
@@ -23,7 +23,7 @@ A profile is a JSON file, and JSON is slow to edit by hand. The app gives the fi
 
 ## How it works
 
-Start the app, then open a file or start a new one. [The video](profile-app/profile-app.mp4) shows the whole path in 72 seconds: it adds an entry to the example, then moves it to inspirations. Its words are in [profile-app.srt](profile-app/profile-app.srt).
+Start the app, then open a file or start a new one. [The video](profile-app/profile-app.mp4) shows the whole path in 75 seconds: it adds an entry to the example, then moves it to inspirations. Its words are in [profile-app.srt](profile-app/profile-app.srt).
 
 1. Run `npm install`, then `npm run dev`. Open the address that the command prints.
 2. Select **New profile**, **Open a file** or **See the example**.
@@ -161,6 +161,6 @@ Each promise is checked by a test in `test/app.test.mjs`.
 | `src/explain.ts` | Turns a problem into a sentence about a form field |
 | `src/jsonld.ts` | The JSON-LD export |
 | `src/file.ts` | Open, save and download |
-| `video/storyboard.json` | The script of the video: each line of narration and the clicks and keys that go with it |
+| `video/profile-app/storyboard.json` | The script of the video: each line of narration and the clicks and keys that go with it |
 
 Commands: `npm run dev` (the app), `npm run build` (a static copy in `dist/`), `npm test`, `npm run validate -- <file>`. Node 22.18 or newer runs the TypeScript files directly. The app uses Vite, TypeScript, `ajv` and `ajv-formats`.

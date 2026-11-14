@@ -1,5 +1,5 @@
 node_modules/
 dist/
-video/build/
-video/measurements.json
+video/*/build/
+video/*/measurements.json
 .docdocs-serve.log

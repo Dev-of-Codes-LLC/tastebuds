@@ -1,0 +1,166 @@
+{
+  "id": "editor-field",
+  "title": "Tastebuds: the editor field, a first install",
+  "formats": [
+    "16:9"
+  ],
+  "voice": "kokoro:bm_george",
+  "captionStyle": "plain",
+  "stage": "plain",
+  "systems": {
+    "field": {
+      "repo": "../..",
+      "baseUrl": "http://localhost:4174",
+      "build": "npm run build:field",
+      "serve": "npm run example:field"
+    }
+  },
+  "scenes": [
+    {
+      "type": "card",
+      "template": "title",
+      "fields": {
+        "kicker": "Tastebuds",
+        "title": "The editor field: a first install",
+        "subtitle": "From an empty folder to a working field",
+        "mark": ""
+      },
+      "beats": [
+        {
+          "say": "The notes in Tastebuds are written in a small editor field. Any web page can embed it. This is a first install."
+        }
+      ]
+    },
+    {
+      "type": "card",
+      "template": "text",
+      "fields": {
+        "kicker": "Three commands",
+        "title": "Clone, install, build",
+        "body": "clone 0.3 s  \u00b7  install 2.9 s  \u00b7  build 1.4 s",
+        "mark": ""
+      },
+      "beats": [
+        {
+          "say": "Clone the repository, install, and build the field. Measured on one machine, the three commands took under five seconds.",
+          "hold": 1500
+        }
+      ]
+    },
+    {
+      "type": "code",
+      "repo": "../..",
+      "diff": "ac3331a..5e2fa59",
+      "files": [
+        "packages/editor-field/example/index.html"
+      ],
+      "title": "The whole page",
+      "beats": [
+        {
+          "say": "The page needs three things. A stylesheet.",
+          "do": []
+        },
+        {
+          "say": "An empty element, for the field to build in.",
+          "do": [
+            {
+              "scroll": 300,
+              "at": "element"
+            }
+          ]
+        },
+        {
+          "say": "And one call: create editor, with that element and the text to start with.",
+          "text": "And one call: createEditor, with that element and the text to start with.",
+          "do": [
+            {
+              "scroll": 200,
+              "at": "call"
+            }
+          ]
+        },
+        {
+          "say": "Listen for change, and the page gets the new text after every edit.",
+          "label": "on *change*, save the text"
+        }
+      ]
+    },
+    {
+      "type": "browser",
+      "system": "field",
+      "start": "/example/",
+      "beats": [
+        {
+          "say": "Here is that page. The field opens with its starting notes.",
+          "do": [
+            {
+              "zoom": "body",
+              "scale": 1.7
+            }
+          ]
+        },
+        {
+          "say": "Type, and the text below follows every key.",
+          "do": [
+            {
+              "type": ".ef-content",
+              "text": " It takes typing.",
+              "delay": 40,
+              "at": "Type"
+            }
+          ]
+        },
+        {
+          "say": "Two stars make a word bold as you type. So does control B.",
+          "do": [
+            {
+              "type": ".ef-content",
+              "text": " Add **more salt** next time.",
+              "delay": 45,
+              "at": "stars"
+            }
+          ]
+        },
+        {
+          "say": "A dash and a space start a list.",
+          "do": [
+            {
+              "type": ".ef-content",
+              "text": "\n- one long table\nno menus",
+              "delay": 45,
+              "at": "dash"
+            }
+          ]
+        },
+        {
+          "say": "What the page receives is plain text: a small subset of Markdown, easy to read and easy to store.",
+          "do": [
+            {
+              "zoom": "#out",
+              "scale": 2.0,
+              "at": "plain"
+            }
+          ],
+          "label": "stored as _plain text_",
+          "hold": 2000
+        }
+      ]
+    },
+    {
+      "type": "card",
+      "template": "title",
+      "fields": {
+        "kicker": "Tastebuds",
+        "title": "One call in, one call out",
+        "subtitle": "createEditor \u00b7 on change \u00b7 destroy",
+        "mark": ""
+      },
+      "beats": [
+        {
+          "say": "Create editor makes the field. Destroy removes it. The guide has the rest.",
+          "text": "createEditor makes the field. destroy removes it. The guide has the rest."
+        }
+      ]
+    }
+  ]
+}

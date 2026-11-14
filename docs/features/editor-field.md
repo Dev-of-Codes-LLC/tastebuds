@@ -4,10 +4,10 @@ A small box for formatted notes that any web page can embed with one call.
 
 | | |
 |---|---|
-| Status | In review as of 2026-11-14 |
+| Status | Merged 2026-11-14. The video is in review as of 2026-11-14 |
 | Area | `packages/editor-field`, and the Notes field of the app |
 | Delivered in | Issue #3, "Write entry notes in an embeddable editor field" |
-| Related | [Profile app](profile-app.md), [Profile format](profile-format.md) |
+| Related | [Profile app](profile-app.md), [Profile format](profile-format.md), [the video](editor-field/editor-field.mp4) (60 seconds, narrated) |
 
 ## At a glance
 
@@ -25,7 +25,7 @@ The field is also a test. It is the smallest layer of a larger editor plan: one 
 
 ## How it works
 
-Build the field once, then put it on a page.
+Build the field once, then put it on a page. [The video](editor-field/editor-field.mp4) shows a first install in 60 seconds: the three commands, the whole page, and the field as it takes typing. Its words are in [editor-field.srt](editor-field/editor-field.srt).
 
 1. Run `npm install`, then `npm run build:field`.
 2. Copy `editor-field.js` and `editor-field.css` from `packages/editor-field/dist/` to your page's folder.
@@ -153,6 +153,7 @@ Each promise is checked by a test in `test/editor-field.test.mjs`, or by a run i
 | Type, bold with Ctrl+B, save, and read the note back on its card, in the app | pass |
 | Link and list buttons, a refused bad address, Escape in the link box, in the app | pass |
 | A fresh clone builds the field and the example page takes typing | pass |
+| The video plays the real example page: typing, bold and a list | pass |
 | A person's first install, timed | not checked |
 | Screen reader, phone, Firefox, Safari | not checked |
 
@@ -168,6 +169,7 @@ First install, measured 2026-11-14 on Windows 11 with Node 24 and an empty npm c
 | `packages/editor-field/src/style.css` | The look and its variables |
 | `packages/editor-field/example/index.html` | The first-install page |
 | `packages/editor-field/vite.config.ts` | The one-file build |
+| `video/editor-field/storyboard.json` | The script of the video |
 
 Tiptap packages, all MIT, version 3.34: `core`, `pm`, `extension-document`, `extension-paragraph`, `extension-text`, `extension-hard-break`, `extension-bold`, `extension-italic`, `extension-link`, `extension-list` and `extensions` (undo and placeholder). A list item is limited to one paragraph, to match the stored format.
 
